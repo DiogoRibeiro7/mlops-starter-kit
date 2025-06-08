@@ -1,5 +1,3 @@
-## Example Makefile
-```makefile
 .PHONY: dev data train test serve
 
 dev:
