@@ -1,11 +1,17 @@
-# Use a lightweight ASGI server base
-FROM python:3.10-slim
-
+# Build stage: install serving dependencies
+FROM python:3.10-slim AS builder
 WORKDIR /app
 
-# Copy requirements and install minimal serving deps
+# Copy requirements and install dependencies
 COPY requirements.txt ./
 RUN pip install --no-cache-dir fastapi uvicorn pydantic
+
+# Final stage: lightweight runtime
+FROM python:3.10-slim AS serve
+WORKDIR /app
+
+# Copy only Python packages from builder
+COPY --from=builder /usr/local/lib/python3.10/site-packages/ /usr/local/lib/python3.10/site-packages/
 
 # Copy application code
 COPY src/ /app/src/
