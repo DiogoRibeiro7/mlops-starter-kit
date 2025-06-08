@@ -11,8 +11,8 @@ Below is a scaffold for the project layout along with example configuration file
 ```bash
 ├── README.md
 ├── ROADMAP.md
-├── environment.yml          # Conda env
 ├── pyproject.toml          # Poetry config
+├── environment.yml          # (optional) Conda env
 ├── .env.example            # Sample env vars
 ├── configs/
 │   ├── config.yaml         # Hydra config
@@ -38,7 +38,7 @@ Below is a scaffold for the project layout along with example configuration file
 
 - **Standardize Layout**: Adopt a layered structure (`src/`, `tests/`, `notebooks/`, `configs/`, `docker/`, `scripts/`).
 - **Configuration Management**: Integrate [Hydra](https://hydra.cc/) or [OmegaConf](https://omegaconf.readthedocs.io/) for flexible, hierarchical runtime configs.
-- **Environment Management**: Provide `environment.yml` (Conda) and/or `pyproject.toml` with Poetry for reproducible installs.
+- **Environment Management**: Use `pyproject.toml` with Poetry for reproducible installs (optionally provide `environment.yml` for Conda users).
 - **Secrets Handling**: Support `.env` files and integration with Vault or AWS Secrets Manager.
 
 ## 2. Development Workflow
