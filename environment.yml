@@ -1,0 +1,13 @@
+name: mlops-starter
+channels:
+  - defaults
+  - conda-forge
+dependencies:
+  - python=3.10
+  - pip
+  - pip:
+      - hydra-core
+      - omegaconf
+      - python-dotenv
+      - structlog
+      - pyyaml
