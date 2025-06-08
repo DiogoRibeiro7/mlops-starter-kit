@@ -1,0 +1,28 @@
+name: Docker Build
+
+on:
+  push:
+    tags:
+      - '*'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build Train Image
+        run: docker build -f docker/train.Dockerfile -t mlops-starter-kit:train .
+      - name: Build Serve Image
+        run: docker build -f docker/serve.Dockerfile -t mlops-starter-kit:serve .
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Push Docker images
+        run: |
+          docker tag mlops-starter-kit:train ${{ secrets.DOCKERHUB_USERNAME }}/mlops-starter-kit:train-${{ github.sha }}
+          docker tag mlops-starter-kit:serve ${{ secrets.DOCKERHUB_USERNAME }}/mlops-starter-kit:serve-${{ github.sha }}
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/mlops-starter-kit:train-${{ github.sha }}
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/mlops-starter-kit:serve-${{ github.sha }}
