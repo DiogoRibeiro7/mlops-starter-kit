@@ -1,4 +1,3 @@
-import os
 from pathlib import Path
 from .config import RAW_DIR, PROCESSED_DIR
 
@@ -13,7 +12,7 @@ def load_raw_data():
         - Assumes RAW_DIR is a predefined directory path.
         - Assumes load_csv is a function that loads a CSV file and returns its contents.
     """
-    raw_files = list(Path(RAW_DIR).glob("*.csv"))
+    raw_files = list(RAW_DIR.glob("*.csv"))
     data = [load_csv(file) for file in raw_files]
     return data
 
@@ -44,8 +43,8 @@ def save_processed_data(df, filename: str):
     Raises:
         OSError: If the directory cannot be created or the file cannot be written.
     """
-    os.makedirs(PROCESSED_DIR, exist_ok=True)
-    out_path = Path(PROCESSED_DIR) / filename
+    PROCESSED_DIR.mkdir(parents=True, exist_ok=True)
+    out_path = PROCESSED_DIR / filename
     df.to_csv(out_path, index=False)
     return out_path
 
