@@ -12,6 +12,10 @@ Additional modules and CI workflows can be added as your project grows.
 
 ## Setup
 
+This project manages dependencies with [Poetry](https://python-poetry.org/).
+Install Poetry and use it to create the virtual environment from
+`pyproject.toml`:
+
 ```bash
 pip install poetry
 poetry install
