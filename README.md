@@ -31,3 +31,9 @@ docker build -f docker/train.Dockerfile -t mlops-starter-kit:train .
 docker build -f docker/serve.Dockerfile -t mlops-starter-kit:serve .
 docker run -p 8000:8000 mlops-starter-kit:serve
 ```
+
+## Data directories
+
+Raw data files are expected under `data/raw/` and processed data under
+`data/processed/` at the project root. You can override these paths by setting
+the `RAW_DIR` and `PROCESSED_DIR` environment variables.
