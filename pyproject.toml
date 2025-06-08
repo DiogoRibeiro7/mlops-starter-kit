@@ -9,6 +9,11 @@ python = "^3.10"
 hydra-core = "*"
 omegaconf = "*"
 python-dotenv = "*"
+fastapi = "*"
+pydantic = "*"
+pandas = "*"
+torch = "*"
+uvicorn = "*"
 
 [tool.poetry.dev-dependencies]
 pytest = "*"

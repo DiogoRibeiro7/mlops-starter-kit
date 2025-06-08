@@ -10,6 +10,8 @@ RUN apt-get update && apt-get install -y \
     git \
   && rm -rf /var/lib/apt/lists/*
 
-# Copy and install Python dependencies
-COPY requirements.txt ./
-RUN pip install --no-cache-dir -r requirements.txt
+# Copy project files and install dependencies
+COPY pyproject.toml ./
+RUN pip install --no-cache-dir poetry \
+    && poetry config virtualenvs.create false \
+    && poetry install --no-dev

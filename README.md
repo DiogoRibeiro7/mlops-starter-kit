@@ -13,7 +13,8 @@ Additional modules and CI workflows can be added as your project grows.
 ## Setup
 
 ```bash
-pip install -r requirements.txt
+pip install poetry
+poetry install
 make dev  # launch and connect to devcontainer
 ```
 
