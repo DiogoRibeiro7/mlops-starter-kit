@@ -15,10 +15,26 @@ pip install -r requirements.txt
 make dev  # launch and connect to devcontainer
 ```
 
-## Usage
+## Quickstart (CPU)
 
-- `make data` to download and preprocess data
+```bash
+make data   # download and preprocess data
+make train  # train models (CPU)
+make serve  # build & run serving container at localhost:8000 (CPU)
+```
 
-- `make train` to train models
+## Quickstart (GPU)
 
-- `make serve` to spin up a local API
+If you have NVIDIA GPUs and the NVIDIA Container Toolkit installed, you can build and run GPU-enabled images:
+
+```bash
+# Build GPU training image
+docker build -f docker/train.Dockerfile -t mlops-starter-kit:train-gpu .
+# Run training with GPU
+docker run --gpus all mlops-starter-kit:train-gpu
+
+# Build GPU serving image
+docker build -f docker/serve.Dockerfile -t mlops-starter-kit:serve-gpu .
+# Run serving with GPU
+docker run --gpus all -p 8000:8000 mlops-starter-kit:serve-gpu
+```
