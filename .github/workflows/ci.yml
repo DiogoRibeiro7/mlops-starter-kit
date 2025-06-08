@@ -20,10 +20,10 @@ jobs:
           poetry install
       - name: Lint
         run: |
-          flake8 src/ tests/
+          poetry run flake8 src/ tests/
       - name: Test
         run: |
-          pytest --maxfail=1 --disable-warnings -q
+          poetry run pytest --maxfail=1 --disable-warnings -q
       - name: Integration Tests
         run: |
-          pytest tests/integration --maxfail=1 --disable-warnings -q
+          poetry run pytest tests/integration --maxfail=1 --disable-warnings -q
