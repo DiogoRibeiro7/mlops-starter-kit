@@ -6,6 +6,36 @@ This roadmap outlines enhancements to transform the minimal skeleton into a more
 
 ## 1. Project Structure & Configuration
 
+Below is a scaffold for the project layout along with example configuration files for environment management, secret handling, and runtime configs.
+
+```bash
+├── README.md
+├── ROADMAP.md
+├── environment.yml          # Conda env
+├── pyproject.toml          # Poetry config
+├── .env.example            # Sample env vars
+├── configs/
+│   ├── config.yaml         # Hydra config
+│   └── logging.yaml        # Logging config
+├── src/
+│   └── mlops_starter_kit/
+│       ├── __init__.py
+│       ├── main.py         # Entrypoint
+│       ├── config.py       # Config loader
+│       └── utils.py        # Utility functions
+├── tests/
+│   ├── test_config.py
+│   └── test_utils.py
+├── notebooks/
+│   └── exploration.ipynb
+├── docker/
+│   ├── Dockerfile
+│   └── docker-compose.yml
+└── scripts/
+    ├── ingest_data.py
+    └── serve_model.sh
+```
+
 - **Standardize Layout**: Adopt a layered structure (`src/`, `tests/`, `notebooks/`, `configs/`, `docker/`, `scripts/`).
 - **Configuration Management**: Integrate [Hydra](https://hydra.cc/) or [OmegaConf](https://omegaconf.readthedocs.io/) for flexible, hierarchical runtime configs.
 - **Environment Management**: Provide `environment.yml` (Conda) and/or `pyproject.toml` with Poetry for reproducible installs.
