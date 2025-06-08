@@ -8,8 +8,10 @@ RUN apt-get update && apt-get install -y \
     build-essential git \
   && rm -rf /var/lib/apt/lists/*
 
-COPY requirements.txt ./
-RUN pip install --no-cache-dir -r requirements.txt
+COPY pyproject.toml ./
+RUN pip install --no-cache-dir poetry \
+    && poetry config virtualenvs.create false \
+    && poetry install --no-dev
 
 # GPU-enabled base stage
 FROM nvidia/cuda:11.8.0-devel-ubuntu20.04 AS gpu-base
@@ -20,8 +22,10 @@ RUN apt-get update && apt-get install -y \
     build-essential git && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
-COPY requirements.txt ./
-RUN pip3 install --no-cache-dir -r requirements.txt
+COPY pyproject.toml ./
+RUN pip3 install --no-cache-dir poetry \
+    && poetry config virtualenvs.create false \
+    && poetry install --no-dev
 
 # Install GPU-specific ML libraries
 RUN pip3 install --no-cache-dir torch torchvision --extra-index-url https://download.pytorch.org/whl/cu118
