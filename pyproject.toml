@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "mlops-starter-kit"
+version = "0.1.0"
+description = "Starter kit for MLOps projects"
+authors = ["Your Name <you@example.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+hydra-core = "*"
+omegaconf = "*"
+python-dotenv = "*"
+
+[tool.poetry.dev-dependencies]
+pytest = "*"
+pre-commit = "*"
+black = "*"
+mypy = "*"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
