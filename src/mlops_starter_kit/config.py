@@ -10,6 +10,11 @@ ENV_PATH = Path(__file__).parents[2] / ".env"
 if ENV_PATH.exists():
     load_dotenv(dotenv_path=ENV_PATH)
 
+# Project paths
+PROJECT_ROOT = Path(__file__).parents[2]
+RAW_DIR = Path(os.getenv("RAW_DIR", PROJECT_ROOT / "data" / "raw"))
+PROCESSED_DIR = Path(os.getenv("PROCESSED_DIR", PROJECT_ROOT / "data" / "processed"))
+
 def load_config(config_path: str = None) -> DictConfig:
     """
     Load the main Hydra/OmegaConf configuration.
