@@ -1,3 +1,16 @@
+# Base stage with Python runtime and common dependencies
+FROM python:3.10-slim AS base
+
+WORKDIR /app
+
+# Install system packages and Python dependencies
+RUN apt-get update && apt-get install -y \
+    build-essential git \
+  && rm -rf /var/lib/apt/lists/*
+
+COPY requirements.txt ./
+RUN pip install --no-cache-dir -r requirements.txt
+
 # GPU-enabled base stage
 FROM nvidia/cuda:11.8.0-devel-ubuntu20.04 AS gpu-base
 
