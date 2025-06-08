@@ -5,10 +5,10 @@ RUN apt-get update && apt-get install -y \
     python3.10 python3-pip && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
-RUN pip3 install --no-cache-dir poetry
-COPY pyproject.toml poetry.lock* ./
-RUN poetry config virtualenvs.create false \
-    && poetry install --no-interaction --no-ansi \
+COPY pyproject.toml ./
+RUN pip3 install --no-cache-dir poetry \
+    && poetry config virtualenvs.create false \
+    && poetry install --no-dev \
     && pip3 install --no-cache-dir torch torchvision --extra-index-url https://download.pytorch.org/whl/cu118
 
 COPY src/ /app/src/
