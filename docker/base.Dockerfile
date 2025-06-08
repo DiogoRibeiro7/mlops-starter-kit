@@ -10,8 +10,8 @@ RUN apt-get update && apt-get install -y \
     git \
   && rm -rf /var/lib/apt/lists/*
 
-# Install Poetry and project dependencies
-RUN pip install --no-cache-dir poetry
-COPY pyproject.toml poetry.lock* ./
-RUN poetry config virtualenvs.create false \
-    && poetry install --no-interaction --no-ansi
+# Copy project files and install dependencies
+COPY pyproject.toml ./
+RUN pip install --no-cache-dir poetry \
+    && poetry config virtualenvs.create false \
+    && poetry install --no-dev
