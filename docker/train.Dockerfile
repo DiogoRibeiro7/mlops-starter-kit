@@ -1,20 +1,25 @@
-# Build stage: install ML libraries
-FROM base AS builder
+# GPU-enabled base stage
+FROM nvidia/cuda:11.8.0-devel-ubuntu20.04 AS gpu-base
 
-# Install ML-specific libraries
-RUN pip install --no-cache-dir \
-    torch torchvision \
-    scikit-learn pandas numpy
+# Install Python and system deps
+RUN apt-get update && apt-get install -y \
+    python3.10 python3-pip python3-dev \
+    build-essential git && rm -rf /var/lib/apt/lists/*
 
-# Final stage: copy only necessary artifacts
+WORKDIR /app
+COPY requirements.txt ./
+RUN pip3 install --no-cache-dir -r requirements.txt
+
+# Install GPU-specific ML libraries
+RUN pip3 install --no-cache-dir torch torchvision --extra-index-url https://download.pytorch.org/whl/cu118
+
+# Final stage: copy runtime
 FROM base AS train
 
-# Copy installed Python packages from builder
-COPY --from=builder /usr/local/lib/python3.10/site-packages/ /usr/local/lib/python3.10/site-packages/
+# Copy Python packages from GPU base
+COPY --from=gpu-base /usr/local/lib/python3.10/dist-packages/ /usr/local/lib/python3.10/dist-packages/
 
-# Copy source code
 COPY src/ /app/src/
 WORKDIR /app
 
-# Entry point for training
-ENTRYPOINT ["python", "-m", "src.mlops_starter_kit.modeling.train"]
+ENTRYPOINT ["python3", "-m", "src.mlops_starter_kit.modeling.train"]
