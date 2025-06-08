@@ -6,7 +6,7 @@ A production-ready starter kit for building and deploying end-to-end ML pipeline
 - **Dockerfiles** for training & serving images
 - **CI/CD** workflows under `.github/workflows`
 - **Orchestration** templates for Airflow and Kubeflow
-- **Modular code layout** with `src/mlops_starter_kit`
+- **Modular code layout** with `src/mlops_starter_kit` (skeleton only)
 
 ## Setup
 
