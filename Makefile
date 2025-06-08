@@ -9,7 +9,7 @@ dev:
 	  /bin/bash
 
 data:
-	python -m src.mlops_starter_kit.data
+	python -m src.mlops_starter_kit.data.__init__
 
 train:
 	python -m src.mlops_starter_kit.modeling.train
