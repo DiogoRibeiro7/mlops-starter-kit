@@ -1,12 +1,14 @@
 # mlops-starter-kit
 
-A production-ready starter kit for building and deploying end-to-end ML pipelines. Includes:
+A minimal skeleton for starting MLOps projects.
+Currently this repository only includes:
 
-- **Devcontainer** for consistent development environments
-- **Dockerfiles** for training & serving images
-- **CI/CD** workflows under `.github/workflows`
-- **Orchestration** templates for Airflow and Kubeflow
-- **Modular code layout** with `src/mlops_starter_kit` (skeleton only)
+- **Devcontainer** configuration for consistent development environments
+- **Dockerfiles** for training and serving images
+- **A basic** `Makefile` with placeholder commands
+- **Example** configuration in `config.py`
+
+Additional modules and CI workflows can be added as your project grows.
 
 ## Setup
 
@@ -15,26 +17,16 @@ pip install -r requirements.txt
 make dev  # launch and connect to devcontainer
 ```
 
-## Quickstart (CPU)
+## Quickstart
+
+This repository does not yet include a full pipeline. You can still build the
+provided Docker images to experiment with the environment:
 
 ```bash
-make data   # download and preprocess data
-make train  # train models (CPU)
-make serve  # build & run serving container at localhost:8000 (CPU)
-```
+# Build the training image
+docker build -f docker/train.Dockerfile -t mlops-starter-kit:train .
 
-## Quickstart (GPU)
-
-If you have NVIDIA GPUs and the NVIDIA Container Toolkit installed, you can build and run GPU-enabled images:
-
-```bash
-# Build GPU training image
-docker build -f docker/train.Dockerfile -t mlops-starter-kit:train-gpu .
-# Run training with GPU
-docker run --gpus all mlops-starter-kit:train-gpu
-
-# Build GPU serving image
-docker build -f docker/serve.Dockerfile -t mlops-starter-kit:serve-gpu .
-# Run serving with GPU
-docker run --gpus all -p 8000:8000 mlops-starter-kit:serve-gpu
+# Build the serving image and run it locally
+docker build -f docker/serve.Dockerfile -t mlops-starter-kit:serve .
+docker run -p 8000:8000 mlops-starter-kit:serve
 ```
