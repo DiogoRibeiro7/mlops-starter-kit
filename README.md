@@ -68,4 +68,12 @@ Raw data files are expected under `data/raw/` and processed data under
 the `RAW_DIR` and `PROCESSED_DIR` environment variables.
 
 Environment variables can be stored in a `.env` file. See `.env.example` for a
-list of supported variables used by the configuration loader.
+list of supported variables used by the configuration loader. Key variables
+include:
+
+```
+PROJECT_NAME   # overrides the project name
+DATASET_PATH   # path where datasets are stored
+DATASET_FILENAME  # CSV filename inside DATASET_PATH
+TARGET_COL     # name of the target column in the dataset
+```

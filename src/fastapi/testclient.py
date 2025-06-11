@@ -10,6 +10,8 @@ class Response:
         return self._json
 
 class TestClient:
+    __test__ = False  # avoid pytest collecting this class as a test
+
     def __init__(self, app) -> None:
         self.app = app
 
