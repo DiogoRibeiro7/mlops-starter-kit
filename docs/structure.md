@@ -15,10 +15,19 @@ The repository currently contains only the bare essentials required to start an 
 ├── docs/               # Project documentation
 │   └── structure.md    # This file
 ├── config.py           # Example configuration variables
-├── Makefile            # Placeholder helper targets
+├── data/               # Raw and processed datasets
+│   └── raw/example.csv
+├── scripts/            # Helper CLI scripts
+│   ├── ingest_data.py
+│   └── serve_model.sh
+├── notebooks/          # Example notebooks
+│   └── example_pipeline.ipynb
+├── src/                # Python source code
+├── tests/              # Unit and integration tests
+├── Makefile            # Helper targets
 ├── README.md           # Project overview
 └── LICENSE             # License information
 ```
 
-Directories such as `src/`, `data/`, `tests/` and CI/CD workflows can be added
-later as the project evolves.
+These directories help organise code, automation and exploratory work as the
+project evolves.

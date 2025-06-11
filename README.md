@@ -1,5 +1,8 @@
 # mlops-starter-kit
 
+[![CI](https://github.com/your-org/mlops-starter-kit/actions/workflows/ci.yml/badge.svg)](https://github.com/your-org/mlops-starter-kit/actions/workflows/ci.yml)
+[![PR Checks](https://github.com/your-org/mlops-starter-kit/actions/workflows/pr.yml/badge.svg)](https://github.com/your-org/mlops-starter-kit/actions/workflows/pr.yml)
+
 A minimal skeleton for starting MLOps projects.
 Currently this repository only includes:
 
@@ -9,6 +12,8 @@ Currently this repository only includes:
 - **Example** configuration in `config.py`
 
 Additional modules and CI workflows can be added as your project grows.
+
+For planned enhancements see [ROADMAP.md](ROADMAP.md).
 
 ## Setup
 
@@ -20,6 +25,20 @@ Install Poetry and use it to create the virtual environment from
 pip install poetry
 poetry install
 make dev  # launch and connect to devcontainer
+```
+
+### Running in VS Code
+
+The repository contains a pre-configured devcontainer. From VS Code you can
+"Reopen in Container" to get an environment with all dependencies installed.
+Alternatively run `make dev` from the command line which uses the same Docker
+image.
+
+To format, lint and type-check the codebase locally, run:
+
+```bash
+make lint
+make test
 ```
 
 ## Quickstart
@@ -36,8 +55,25 @@ docker build -f docker/serve.Dockerfile -t mlops-starter-kit:serve .
 docker run -p 8000:8000 mlops-starter-kit:serve
 ```
 
+### Example pipeline
+
+An example dataset is provided under `data/raw/example.csv`. A short notebook
+(`notebooks/example_pipeline.ipynb`) demonstrates loading this data, training a
+model and evaluating it using the utilities in `src/mlops_starter_kit/`.
+
 ## Data directories
 
 Raw data files are expected under `data/raw/` and processed data under
 `data/processed/` at the project root. You can override these paths by setting
 the `RAW_DIR` and `PROCESSED_DIR` environment variables.
+
+Environment variables can be stored in a `.env` file. See `.env.example` for a
+list of supported variables used by the configuration loader. Key variables
+include:
+
+```
+PROJECT_NAME   # overrides the project name
+DATASET_PATH   # path where datasets are stored
+DATASET_FILENAME  # CSV filename inside DATASET_PATH
+TARGET_COL     # name of the target column in the dataset
+```
