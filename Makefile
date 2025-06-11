@@ -1,4 +1,4 @@
-.PHONY: dev data train test serve
+.PHONY: dev data train test serve lint
 
 dev:
 	docker run --rm -it \
@@ -15,7 +15,10 @@ train:
 	python -m src.mlops_starter_kit.modeling.train
 
 test:
-	pytest --maxfail=1 --disable-warnings -q
+        pytest --maxfail=1 --disable-warnings -q
+
+lint:
+        pre-commit run --files $(shell git ls-files '*.py')
 
 serve:
 	docker build -f docker/serve.Dockerfile -t mlops-starter-kit:serve .

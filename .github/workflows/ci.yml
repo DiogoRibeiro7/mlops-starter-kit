@@ -23,7 +23,19 @@ jobs:
           poetry run flake8 src/ tests/
       - name: Test
         run: |
-          poetry run pytest --maxfail=1 --disable-warnings -q
+          poetry run pytest --cov=src --cov-report=xml --maxfail=1 --disable-warnings -q
+      - name: Upload coverage
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage-xml
+          path: coverage.xml
       - name: Integration Tests
         run: |
           poetry run pytest tests/integration --maxfail=1 --disable-warnings -q
+      - name: Smoke test container
+        run: |
+          docker build -f docker/serve.Dockerfile -t mlops-starter-kit:serve .
+          docker run -d -p 8000:8000 --name api mlops-starter-kit:serve
+          sleep 5
+          curl -f http://localhost:8000/
+          docker stop api

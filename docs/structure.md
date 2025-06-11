@@ -20,5 +20,6 @@ The repository currently contains only the bare essentials required to start an 
 └── LICENSE             # License information
 ```
 
-Directories such as `src/`, `data/`, `tests/` and CI/CD workflows can be added
-later as the project evolves.
+Additional directories such as `src/`, `data/`, `tests/`, `scripts/` and
+`notebooks/` help organise code, automation and exploratory work as the project
+evolves.
