@@ -1,27 +1,41 @@
-[tool.poetry]
+[project]
 name = "mlops-starter-kit"
 version = "0.1.0"
-description = "Starter kit for MLOps projects"
-authors = ["Your Name <you@example.com>"]
+description = "Package-first starter kit for reproducible MLOps projects"
+authors = [{ name = "Diogo Ribeiro" }]
+readme = "README.md"
+requires-python = ">=3.10,<4.0"
+dependencies = [
+    "fastapi",
+    "hydra-core",
+    "omegaconf",
+    "pandas",
+    "pydantic",
+    "python-dotenv",
+    "torch",
+    "uvicorn",
+]
 
-[tool.poetry.dependencies]
-python = "^3.10"
-hydra-core = "*"
-omegaconf = "*"
-python-dotenv = "*"
-fastapi = "*"
-pydantic = "*"
-pandas = "*"
-torch = "*"
-uvicorn = "*"
+[project.scripts]
+mlops-starter-kit = "mlops_starter_kit.scripts:main"
 
-[tool.poetry.dev-dependencies]
-pytest = "*"
-pre-commit = "*"
+[tool.poetry]
+packages = [{ include = "mlops_starter_kit", from = "src" }]
+
+[tool.poetry.group.dev.dependencies]
 black = "*"
-mypy = "*"
 flake8 = "*"
+mypy = "*"
+pre-commit = "*"
+pytest = "*"
 pytest-cov = "*"
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+addopts = "-q"
+
+[tool.black]
+line-length = 100
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

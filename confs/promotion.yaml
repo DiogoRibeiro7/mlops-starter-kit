@@ -1,0 +1,9 @@
+job:
+  kind: promotion
+registry:
+  path: artifacts/registry.json
+model:
+  name: baseline_model
+  version: 1
+promotion:
+  alias: champion

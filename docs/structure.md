@@ -1,6 +1,6 @@
 # Project Structure
 
-The repository currently contains only the bare essentials required to start an MLOps project.
+The repository now follows a package-first MLOps layout with config-driven jobs.
 
 ```
 .
@@ -8,13 +8,14 @@ The repository currently contains only the bare essentials required to start an 
 │   ├── devcontainer.json
 │   └── vscode/
 │       └── settings.json
+├── confs/              # Job configuration files
 ├── docker/             # Dockerfiles and build contexts
 │   ├── base.Dockerfile
 │   ├── train.Dockerfile
 │   └── serve.Dockerfile
-├── docs/               # Project documentation
+├── documentation/      # Maintained architecture and roadmap docs
+├── docs/               # Legacy documentation entrypoints
 │   └── structure.md    # This file
-├── config.py           # Example configuration variables
 ├── data/               # Raw and processed datasets
 │   └── raw/example.csv
 ├── scripts/            # Helper CLI scripts
@@ -23,11 +24,18 @@ The repository currently contains only the bare essentials required to start an 
 ├── notebooks/          # Example notebooks
 │   └── example_pipeline.ipynb
 ├── src/                # Python source code
+│   └── mlops_starter_kit/
+│       ├── core/       # Models, metrics and schemas
+│       ├── io/         # Configs, datasets, provenance and registry
+│       ├── jobs/       # Training, inference, evaluation and governance jobs
+│       └── utils/      # Search, split and signature helpers
+├── tasks/              # just task fragments
 ├── tests/              # Unit and integration tests
+├── justfile            # just automation entrypoint
 ├── Makefile            # Helper targets
 ├── README.md           # Project overview
 └── LICENSE             # License information
 ```
 
-These directories help organise code, automation and exploratory work as the
-project evolves.
+These directories separate domain logic from IO, executable workflows and local
+automation so the starter can grow into a real package without a large rewrite.

@@ -1,79 +1,96 @@
-# mlops-starter-kit
+# MLOps Starter Kit
 
-[![CI](https://github.com/your-org/mlops-starter-kit/actions/workflows/ci.yml/badge.svg)](https://github.com/your-org/mlops-starter-kit/actions/workflows/ci.yml)
-[![PR Checks](https://github.com/your-org/mlops-starter-kit/actions/workflows/pr.yml/badge.svg)](https://github.com/your-org/mlops-starter-kit/actions/workflows/pr.yml)
+[![CI](https://github.com/DiogoRibeiro7/mlops-starter-kit/actions/workflows/ci.yml/badge.svg)](https://github.com/DiogoRibeiro7/mlops-starter-kit/actions/workflows/ci.yml)
+[![PR Checks](https://github.com/DiogoRibeiro7/mlops-starter-kit/actions/workflows/pr.yml/badge.svg)](https://github.com/DiogoRibeiro7/mlops-starter-kit/actions/workflows/pr.yml)
 
-A minimal skeleton for starting MLOps projects.
-Currently this repository only includes:
+`mlops-starter-kit` is a package-first template for reproducible machine-learning workflows. It follows the same broad architecture as `mlops-python-package`: installable source code, explicit IO boundaries, config-driven jobs, local model registry primitives, CI checks, Docker entrypoints and maintained architecture documentation.
 
-- **Devcontainer** configuration for consistent development environments
-- **Dockerfiles** for training and serving images
-- **A basic** `Makefile` with placeholder commands
-- **Example** configuration in `config.py`
+This repository remains generic. It does not copy the bike-demand dataset or domain-specific implementation from the reference project; instead it provides the same shape for a new MLOps codebase.
 
-Additional modules and CI workflows can be added as your project grows.
+## Architecture
 
-For planned enhancements see [ROADMAP.md](ROADMAP.md).
+The project centers on an installable Python package and CLI:
 
-## Setup
+| Path | Responsibility |
+| --- | --- |
+| `src/mlops_starter_kit/core/` | Models, metrics and lightweight dataframe schemas |
+| `src/mlops_starter_kit/io/` | Configs, datasets, provenance, local registry and service boundaries |
+| `src/mlops_starter_kit/jobs/` | Training, tuning, inference, evaluation, explanation, promotion and rollback jobs |
+| `src/mlops_starter_kit/utils/` | Search, signature and splitting helpers plus compatibility utilities |
+| `confs/` | Example job configurations |
+| `tests/` | Unit and integration tests |
+| `documentation/` | Architecture notes and roadmap |
+| `tasks/` | `just` task fragments for local automation |
 
-This project manages dependencies with [Poetry](https://python-poetry.org/).
-Install Poetry and use it to create the virtual environment from
-`pyproject.toml`:
+See [`documentation/ARCHITECTURE.md`](documentation/ARCHITECTURE.md) for the component view and intentional limits.
+
+## Development Setup
+
+Install Poetry and create the environment from `pyproject.toml`:
 
 ```bash
 pip install poetry
 poetry install
-make dev  # launch and connect to devcontainer
 ```
 
-### Running in VS Code
-
-The repository contains a pre-configured devcontainer. From VS Code you can
-"Reopen in Container" to get an environment with all dependencies installed.
-Alternatively run `make dev` from the command line which uses the same Docker
-image.
-
-To format, lint and type-check the codebase locally, run:
+Run the same core checks used by CI:
 
 ```bash
 make lint
 make test
 ```
 
-## Quickstart
-
-This repository does not yet include a full pipeline. You can still build the
-provided Docker images to experiment with the environment:
+If you use `just`, the task layout mirrors the reference project:
 
 ```bash
-# Build the training image
-docker build -f docker/train.Dockerfile -t mlops-starter-kit:train .
+just --list
+just check
+just train
+```
 
-# Build the serving image and run it locally
+## Quickstart
+
+Run the starter training job against the small example dataset:
+
+```bash
+poetry run mlops-starter-kit confs/training.yaml
+```
+
+That command loads `data/raw/example.csv`, validates the target column, trains a majority-class baseline, writes a model artifact under `artifacts/`, fingerprints the training data and registers the model in a local JSON registry.
+
+After training, evaluate the saved model:
+
+```bash
+poetry run mlops-starter-kit confs/evaluations.yaml
+```
+
+Inspect the CLI schema:
+
+```bash
+poetry run mlops-starter-kit --schema
+```
+
+## Docker
+
+Build and run the serving image locally:
+
+```bash
 docker build -f docker/serve.Dockerfile -t mlops-starter-kit:serve .
 docker run -p 8000:8000 mlops-starter-kit:serve
 ```
 
-### Example pipeline
+## Configuration
 
-An example dataset is provided under `data/raw/example.csv`. A short notebook
-(`notebooks/example_pipeline.ipynb`) demonstrates loading this data, training a
-model and evaluating it using the utilities in `src/mlops_starter_kit/`.
+Job configs live in `confs/` and use a small YAML subset that works without optional dependencies. The legacy `configs/` directory remains for compatibility with earlier examples.
 
-## Data directories
+Environment variables can still be stored in a `.env` file. Key variables include:
 
-Raw data files are expected under `data/raw/` and processed data under
-`data/processed/` at the project root. You can override these paths by setting
-the `RAW_DIR` and `PROCESSED_DIR` environment variables.
-
-Environment variables can be stored in a `.env` file. See `.env.example` for a
-list of supported variables used by the configuration loader. Key variables
-include:
-
-```
-PROJECT_NAME   # overrides the project name
-DATASET_PATH   # path where datasets are stored
-DATASET_FILENAME  # CSV filename inside DATASET_PATH
-TARGET_COL     # name of the target column in the dataset
+```text
+PROJECT_NAME
+DATASET_PATH
+DATASET_FILENAME
+TARGET_COL
+RAW_DIR
+PROCESSED_DIR
+ARTIFACTS_DIR
 ```

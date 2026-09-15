@@ -1,4 +1,11 @@
-# ROADMAP
+# Roadmap
+
+The maintained roadmap now lives at [`documentation/ROADMAP.md`](documentation/ROADMAP.md).
+This file remains as a compatibility pointer for older links.
+
+---
+
+# Legacy Roadmap
 
 This roadmap outlines enhancements to transform the minimal skeleton into a more production-ready MLOps project template. Iterate on sections or add new ones as needed.
 
