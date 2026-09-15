@@ -3,6 +3,7 @@
 These versions avoid optional third-party dependencies so the unit
 tests remain lightweight.
 """
+
 from __future__ import annotations
 
 import logging
@@ -26,6 +27,7 @@ def load_env(path: str | os.PathLike = ".env") -> None:
             continue
         key, value = line.split("=", 1)
         os.environ.setdefault(key, value)
+
 
 PROJECT_ROOT = Path(__file__).parents[2]
 RAW_DIR = Path(os.getenv("RAW_DIR", PROJECT_ROOT / "data" / "raw"))

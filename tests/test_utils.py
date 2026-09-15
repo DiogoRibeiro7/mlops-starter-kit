@@ -13,7 +13,9 @@ def test_load_data(tmp_path: Path) -> None:
 
 def test_split_data() -> None:
     df = pd.DataFrame({"f1": [1, 2, 3], "target": [0, 1, 0]})
-    X_train, X_test, y_train, y_test = utils.split_data(df, "target", test_size=0.33, random_state=0)
+    X_train, X_test, y_train, y_test = utils.split_data(
+        df, "target", test_size=0.33, random_state=0
+    )
     assert len(X_train) == 2
     assert len(X_test) == 1
     assert len(y_train) == 2
@@ -22,8 +24,12 @@ def test_split_data() -> None:
 
 def test_train_model_and_evaluate() -> None:
     df = pd.DataFrame({"f1": [1, 2, 3, 4], "target": [0, 1, 0, 1]})
-    X_train, X_test, y_train, y_test = utils.split_data(df, "target", test_size=0.5, random_state=0)
-    model = utils.train_model(X_train, y_train, model_name="logistic_regression", max_iter=10)
+    X_train, X_test, y_train, y_test = utils.split_data(
+        df, "target", test_size=0.5, random_state=0
+    )
+    model = utils.train_model(
+        X_train, y_train, model_name="logistic_regression", max_iter=10
+    )
     metrics = utils.evaluate_model(model, X_test, y_test)
     assert set(metrics) == {"accuracy", "precision", "recall", "f1"}
 
