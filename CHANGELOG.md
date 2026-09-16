@@ -13,6 +13,8 @@ Public workflow changes are recorded here before each release.
 - Prediction, readiness and liveness endpoints with request validation.
 - End-to-end tests, Linux/Windows CI, installed-wheel checks and container tests.
 - Contribution, security, configuration, architecture and release guides.
+- Prioritized delivery roadmap with task IDs, dependencies, acceptance criteria
+  and release gates, linked to the contribution process.
 
 ### Changed
 

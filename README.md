@@ -86,6 +86,7 @@ poetry run mlops-starter-kit --schema
 ```
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for the contribution process.
+Planned work, priorities and release gates are in the [roadmap](ROADMAP.md).
 
 ## Docker
 
