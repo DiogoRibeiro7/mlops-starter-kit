@@ -34,7 +34,7 @@ deep-learning = ["torch>=2.2,<3"]
 Homepage = "https://github.com/DiogoRibeiro7/mlops-starter-kit"
 Repository = "https://github.com/DiogoRibeiro7/mlops-starter-kit"
 Issues = "https://github.com/DiogoRibeiro7/mlops-starter-kit/issues"
-Documentation = "https://github.com/DiogoRibeiro7/mlops-starter-kit/tree/main/docs"
+Documentation = "https://diogoribeiro7.github.io/mlops-starter-kit/"
 
 [project.scripts]
 mlops-starter-kit = "mlops_starter_kit.scripts:main"
@@ -52,6 +52,14 @@ pre-commit = ">=4,<5"
 pytest = ">=8,<10"
 pytest-cov = ">=6,<8"
 types-PyYAML = ">=6,<7"
+
+[tool.poetry.group.docs]
+optional = true
+
+[tool.poetry.group.docs.dependencies]
+mkdocs = ">=1.6.1,<2"
+mkdocs-material = ">=9.7.7,<10"
+mkdocs-include-markdown-plugin = ">=7.3,<8"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

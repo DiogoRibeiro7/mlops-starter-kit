@@ -25,10 +25,10 @@ is taken up, not inferred from this document.
 | Serving | FastAPI prediction, schema validation, liveness and readiness | One model loaded at startup; no built-in authentication, telemetry or deployment runbook |
 | Delivery | Linux/Windows tests, 85% branch-aware coverage gate, wheel checks and train/serve container smoke tests | No automated Python package publication; repository settings and operational guarantees need separate verification |
 
-The small [synthetic dataset](../data/README.md) exercises the workflow. Its
+The small [synthetic dataset](dataset.md) exercises the workflow. Its
 scores, including evaluation on the full example table, are not evidence of
 generalization. See [architecture](architecture.md), [workflows](workflows.md)
-and [security](../SECURITY.md) for current contracts and limitations.
+and [security](security.md) for current contracts and limitations.
 
 ## Milestone Order
 

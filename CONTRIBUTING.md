@@ -48,6 +48,20 @@ integrations in extras. Run `poetry lock` after changes and commit the lockfile.
 Pre-commit, local checks and CI use the same Poetry environment and tool
 configuration. Recheck the oldest supported Python after dependency updates.
 
+## Documentation
+
+```bash
+poetry sync --with docs
+poetry run mkdocs serve
+poetry run mkdocs build --strict
+```
+
+The preview uses port 8001. Documentation changes must pass the strict build,
+including internal links and anchors. See the
+[documentation guide](docs/documentation.md) for navigation, shared source files
+and GitHub Pages deployment. The docs dependency group is optional and is not
+installed by the normal `poetry sync` command.
+
 ## Data and Artifacts
 
 Use temporary directories in tests. Never commit real credentials, private
@@ -57,5 +71,6 @@ data and its provenance are documented in `data/README.md`.
 ## Reporting Problems
 
 Include the Python version, operating system, command, sanitized configuration
-and relevant error output. Report vulnerabilities using [SECURITY.md](SECURITY.md),
+and relevant error output. Report vulnerabilities using the
+[security policy](https://github.com/DiogoRibeiro7/mlops-starter-kit/blob/main/SECURITY.md),
 not a public issue containing exploit details or credentials.

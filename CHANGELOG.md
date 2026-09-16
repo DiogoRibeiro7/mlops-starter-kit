@@ -6,6 +6,8 @@ Public workflow changes are recorded here before each release.
 
 ### Added
 
+- MkDocs Material documentation with search, diagrams, shared policy sources,
+  strict pull-request builds and main-branch GitHub Pages publishing.
 - Real scikit-learn training, cross-validation and permutation importance.
 - Validated YAML/JSON configurations and configuration-only CLI validation.
 - Immutable registry snapshots, artifact integrity checks, quality gates and

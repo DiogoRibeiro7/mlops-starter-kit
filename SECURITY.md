@@ -23,7 +23,9 @@ response time; the latest release and `main` are the maintained versions.
 - Containers run as a non-root user. Mount model artifacts read-only for serving.
   Protect the registry and model files with filesystem permissions.
 - Keep secrets outside Git. Use environment variables or your deployment's
-  secret manager. CI uses read-only repository permissions and pinned actions.
+  secret manager. CI builds use read-only repository permissions and pinned
+  actions. The documentation deploy job receives Pages and OIDC write permissions
+  only on `main`; pull requests cannot deploy the site.
 
 See scikit-learn's [model persistence guidance](https://scikit-learn.org/stable/model_persistence.html)
 for artifact format and environment compatibility considerations.

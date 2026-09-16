@@ -1,7 +1,8 @@
 # Releases
 
 The package is pre-1.0. Public interfaces may change; migration notes belong in
-`CHANGELOG.md`. Use semantic version tags of the form `vMAJOR.MINOR.PATCH`.
+[the changelog](changelog.md). Use semantic version tags of the form
+`vMAJOR.MINOR.PATCH`.
 
 1. Update `project.version` in `pyproject.toml` and add a dated changelog section.
 2. Run `poetry check --lock`, the full check command and `poetry build`.

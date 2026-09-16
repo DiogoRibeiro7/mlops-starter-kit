@@ -1,7 +1,7 @@
 # Architecture
 
 ```mermaid
-flowchart LR
+flowchart TB
     Config["YAML / JSON"] --> Validation["Pydantic configuration"]
     Validation --> Jobs["Workflow jobs"]
     Jobs --> Models["scikit-learn estimators"]
