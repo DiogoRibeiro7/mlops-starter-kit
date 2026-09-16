@@ -1,4 +1,4 @@
-.PHONY: install check lint format test train evaluate serve schema data
+.PHONY: install check lint format test train evaluate serve schema data docs docs-serve
 
 install:
 	poetry sync
@@ -28,6 +28,12 @@ schema:
 
 serve:
 	poetry run uvicorn mlops_starter_kit.api:app --host 127.0.0.1 --port 8000
+
+docs:
+	poetry run mkdocs build --strict
+
+docs-serve:
+	poetry run mkdocs serve
 
 data:
 	poetry run python -m mlops_starter_kit.data data/raw/example.csv data/processed/example.csv

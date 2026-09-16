@@ -8,6 +8,20 @@ a FastAPI prediction service.
 
 **Python 3.10-3.14 | Poetry 2.2.1 | MIT license**
 
+## Documentation
+
+The [MkDocs site](https://diogoribeiro7.github.io/mlops-starter-kit/) contains
+the quickstart, workflow guides, architecture, roadmap and project policies.
+GitHub Pages publishes updates after they merge into `main`.
+
+```bash
+poetry sync --with docs
+poetry run mkdocs serve
+```
+
+Preview at `http://127.0.0.1:8001/mlops-starter-kit/`. See the
+[documentation guide](docs/documentation.md) for strict builds and publishing.
+
 ## Quickstart
 
 From a clone of this repository:

@@ -47,8 +47,9 @@ is restored from the artifact. No output file is written if validation fails.
 ## Service Deployment
 
 Set `MODEL_PATH` to a trusted versioned artifact and run the API as described
-in the README. `/healthz` checks process liveness; `/readyz` checks model
-availability. `/predict` returns 422 for invalid records and 503 without a model.
+in the [prediction API guide](serving.md). `/healthz` checks process liveness;
+`/readyz` checks model availability. `/predict` returns 422 for invalid records
+and 503 without a model.
 
 Use the same dependencies for training and serving, mount artifacts read-only,
 and configure authentication, TLS and limits in a gateway. Neither the local
