@@ -10,7 +10,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Build Train Image
         run: docker build -f docker/train.Dockerfile -t mlops-starter-kit:train .
       - name: Build Serve Image
