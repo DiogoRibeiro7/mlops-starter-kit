@@ -7,3 +7,4 @@ model:
   version: 1
 promotion:
   alias: champion
+  min_accuracy: 0.75

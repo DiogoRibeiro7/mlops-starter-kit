@@ -1,41 +1,24 @@
-# Project Structure
+# Repository Structure
 
-The repository now follows a package-first MLOps layout with config-driven jobs.
+See [Architecture](architecture.md) for module responsibilities and
+[CONTRIBUTING.md](../CONTRIBUTING.md) for development commands.
 
+```text
+.github/                 CI, release artifacts, issue and PR templates
+.devcontainer/           Reproducible editor environment
+confs/                   Validated job examples
+data/                    Documented synthetic fixture
+docs/                    Architecture and operational guides
+scripts/                 Cross-platform developer checks
+src/mlops_starter_kit/
+    core/                Estimators, metrics, feature and config contracts
+    io/                  Config/data loading, artifacts, registry and tracking
+    jobs/                Train, tune, evaluate, infer, explain, promote, rollback
+    utils/               Shared helpers and legacy utility imports
+    api.py               Prediction and health endpoints
+    scripts.py           Command line interface
+tests/                   Unit and end-to-end tests using real dependencies
+Dockerfile               Locked builder and non-root train/serve targets
+pyproject.toml            Package metadata and tool configuration
+poetry.lock              Resolved dependency versions
 ```
-.
-├── .dev/               # Devcontainer & editor settings
-│   ├── devcontainer.json
-│   └── vscode/
-│       └── settings.json
-├── confs/              # Job configuration files
-├── docker/             # Dockerfiles and build contexts
-│   ├── base.Dockerfile
-│   ├── train.Dockerfile
-│   └── serve.Dockerfile
-├── documentation/      # Maintained architecture and roadmap docs
-├── docs/               # Legacy documentation entrypoints
-│   └── structure.md    # This file
-├── data/               # Raw and processed datasets
-│   └── raw/example.csv
-├── scripts/            # Helper CLI scripts
-│   ├── ingest_data.py
-│   └── serve_model.sh
-├── notebooks/          # Example notebooks
-│   └── example_pipeline.ipynb
-├── src/                # Python source code
-│   └── mlops_starter_kit/
-│       ├── core/       # Models, metrics and schemas
-│       ├── io/         # Configs, datasets, provenance and registry
-│       ├── jobs/       # Training, inference, evaluation and governance jobs
-│       └── utils/      # Search, split and signature helpers
-├── tasks/              # just task fragments
-├── tests/              # Unit and integration tests
-├── justfile            # just automation entrypoint
-├── Makefile            # Helper targets
-├── README.md           # Project overview
-└── LICENSE             # License information
-```
-
-These directories separate domain logic from IO, executable workflows and local
-automation so the starter can grow into a real package without a large rewrite.

@@ -1,4 +1,11 @@
 job:
   kind: tuning
+dataset:
+  path: data/raw/example.csv
+model:
+  name: tuned_model
+  algorithm: logistic_regression
 search:
-  model_names: baseline_model
+  folds: 3
+  parameters:
+    C: [0.1, 1.0, 10.0]

@@ -1,2 +1,2 @@
 format:
-    poetry run python -m compileall src tests
+    poetry run black src tests scripts

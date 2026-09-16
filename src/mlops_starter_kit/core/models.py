@@ -1,37 +1,67 @@
-"""Small reference models for the starter workflow."""
-
-from __future__ import annotations
+"""Deterministic scikit-learn estimators and their persisted input schema."""
 
 from dataclasses import dataclass
-from typing import Any, Iterable, Sequence
+from typing import Any, Iterable
+
+import pandas as pd
+from sklearn.dummy import DummyClassifier
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.linear_model import LogisticRegression
+
+from mlops_starter_kit.core.schemas import validate_features
 
 
-@dataclass
-class BaselineClassifier:
-    """Majority-class classifier used as a portable starter model."""
+class BaselineClassifier(DummyClassifier):
+    """Majority-class benchmark with the standard estimator interface."""
 
-    majority_class: Any | None = None
+    def __init__(self, random_state: int = 42) -> None:
+        super().__init__(strategy="most_frequent", random_state=random_state)
 
-    def fit(
-        self, features: object, target: Iterable[Any]
-    ) -> "BaselineClassifier":
-        """Fit the classifier by storing the majority target value."""
-        values = list(target)
-        if not values:
-            raise ValueError("target must contain at least one value")
-        self.majority_class = max(set(values), key=values.count)
-        return self
 
-    def predict(self, features: Sequence[Any] | object) -> list[Any]:
-        """Predict the stored majority class for each input row."""
-        if self.majority_class is None:
-            raise ValueError("model must be fitted before prediction")
-        row_count = len(features)  # type: ignore[arg-type]
-        return [self.majority_class for _ in range(row_count)]
+def create_classifier(
+    algorithm: str = "baseline_model",
+    random_seed: int = 42,
+    **parameters: Any,
+) -> Any:
+    """Construct an estimator, rejecting unsupported names and parameters."""
+    constructors = {
+        "baseline_model": BaselineClassifier,
+        "logistic_regression": LogisticRegression,
+        "random_forest": RandomForestClassifier,
+    }
+    if algorithm not in constructors:
+        raise ValueError(f"Unsupported model_name: {algorithm}")
+    options = {"random_state": random_seed, **parameters}
+    if algorithm == "logistic_regression":
+        options.setdefault("max_iter", 1000)
+    return constructors[algorithm](**options)
 
 
 def train_baseline_classifier(
-    features: object, target: Iterable[Any]
+    features: pd.DataFrame, target: Iterable[Any]
 ) -> BaselineClassifier:
-    """Train and return the default baseline classifier."""
-    return BaselineClassifier().fit(features, target)
+    """Fit a majority-class benchmark."""
+    return BaselineClassifier().fit(features, list(target))
+
+
+@dataclass
+class ModelArtifact:
+    """Bundle a fitted estimator with its feature order and target name."""
+
+    estimator: Any
+    features: tuple[str, ...]
+    target_column: str
+    algorithm: str
+
+    def prepare(self, table: pd.DataFrame) -> pd.DataFrame:
+        """Validate and order features consistently for every prediction."""
+        features = table.drop(columns=[self.target_column], errors="ignore")
+        if set(features.columns) != set(self.features):
+            raise ValueError(
+                f"expected feature columns: {', '.join(self.features)}"
+            )
+        return validate_features(features.loc[:, list(self.features)])
+
+    def predict(self, table: pd.DataFrame) -> list[Any]:
+        """Return native Python predictions suitable for JSON responses."""
+        return self.estimator.predict(self.prepare(table)).tolist()

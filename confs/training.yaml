@@ -7,6 +7,7 @@ dataset:
   random_seed: 42
 model:
   name: baseline_model
+  algorithm: logistic_regression
 artifacts:
   directory: artifacts
   registry: artifacts/registry.json

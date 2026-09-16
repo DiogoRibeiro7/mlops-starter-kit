@@ -1,14 +1,17 @@
-"""Data module for mlops-starter-kit.
+"""Validate and ingest numeric classification CSV datasets."""
 
-Provides placeholder functionality and serves as an entry point for
-``make data`` or ``python -m src.mlops_starter_kit.data``.
-"""
+from pathlib import Path
 
+import pandas as pd
 
-def main() -> None:
-    """Simple stub demonstrating a data command."""
-    print("Data module placeholder")
+from mlops_starter_kit.core.schemas import validate_training_table
 
 
-if __name__ == "__main__":
-    main()
+def ingest(
+    source: Path, destination: Path, target_column: str = "target"
+) -> Path:
+    """Validate a CSV and write a normalized copy to its destination."""
+    table = validate_training_table(pd.read_csv(source), target_column)
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    table.to_csv(destination, index=False)
+    return destination

@@ -4,4 +4,5 @@ dataset:
   path: data/raw/example.csv
   target_column: target
 model:
-  path: artifacts/baseline_model.pkl
+  registry: artifacts/registry.json
+  name: baseline_model

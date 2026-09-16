@@ -1,8 +1,4 @@
-"""Configuration helpers for the example project.
-
-These versions avoid optional third-party dependencies so the unit
-tests remain lightweight.
-"""
+"""Compatibility helpers for earlier environment-based scripts."""
 
 from __future__ import annotations
 
@@ -11,6 +7,20 @@ import os
 from pathlib import Path
 from types import SimpleNamespace
 
+from dotenv import load_dotenv
+
+from mlops_starter_kit.settings import PROCESSED_DIR, PROJECT_ROOT, RAW_DIR
+
+__all__ = [
+    "PROCESSED_DIR",
+    "PROJECT_ROOT",
+    "RAW_DIR",
+    "get_config_and_logger",
+    "load_config",
+    "load_env",
+    "setup_logging",
+]
+
 
 def load_env(path: str | os.PathLike = ".env") -> None:
     """Load key=value pairs from an ``.env`` file into ``os.environ``.
@@ -18,22 +28,7 @@ def load_env(path: str | os.PathLike = ".env") -> None:
     Existing variables are not overwritten. Lines starting with ``#`` are
     ignored.
     """
-    env_path = Path(path)
-    if not env_path.exists():
-        return
-    for line in env_path.read_text().splitlines():
-        line = line.strip()
-        if not line or line.startswith("#") or "=" not in line:
-            continue
-        key, value = line.split("=", 1)
-        os.environ.setdefault(key, value)
-
-
-PROJECT_ROOT = Path(__file__).parents[2]
-RAW_DIR = Path(os.getenv("RAW_DIR", PROJECT_ROOT / "data" / "raw"))
-PROCESSED_DIR = Path(
-    os.getenv("PROCESSED_DIR", PROJECT_ROOT / "data" / "processed")
-)
+    load_dotenv(Path(path), override=False)
 
 
 def load_config(config_path: str | None = None) -> SimpleNamespace:

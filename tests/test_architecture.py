@@ -59,6 +59,8 @@ def test_provenance_is_stable() -> None:
 
 def test_registry_promote_and_rollback(tmp_path: Path) -> None:
     registry = LocalModelRegistry(tmp_path / "registry.json")
+    (tmp_path / "first.pkl").write_bytes(b"first model")
+    (tmp_path / "second.pkl").write_bytes(b"second model")
     first = registry.register(
         "baseline", tmp_path / "first.pkl", {"accuracy": 0.5}, "aaa"
     )
@@ -116,7 +118,7 @@ def test_training_job_registers_model(tmp_path: Path) -> None:
 def test_cli_schema_and_job_factory(tmp_path: Path) -> None:
     config_path = tmp_path / "tuning.yaml"
     config_path.write_text(
-        "job:\n  kind: tuning\nsearch:\n  model_names: baseline_model\n",
+        "job:\n  kind: tuning\nsearch:\n  parameters:\n    C: [0.1, 1]\n",
         encoding="utf-8",
     )
 

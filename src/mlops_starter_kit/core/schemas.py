@@ -1,37 +1,53 @@
-"""Lightweight dataframe validation."""
+"""Tabular contracts for the numeric classification example."""
 
-from __future__ import annotations
+from dataclasses import dataclass
 
-from dataclasses import dataclass, field
-from typing import Any
+import numpy as np
+import pandas as pd
 
 
-def _columns(table: Any) -> list[str]:
-    return list(getattr(table, "columns", []))
+def validate_features(table: pd.DataFrame) -> pd.DataFrame:
+    """Require non-empty, unique, finite numeric feature columns."""
+    if table.empty or not table.columns.is_unique:
+        raise ValueError("features must have rows and unique columns")
+    if not all(isinstance(column, str) for column in table.columns):
+        raise ValueError("feature names must be strings")
+    if not all(pd.api.types.is_numeric_dtype(dtype) for dtype in table.dtypes):
+        raise ValueError(
+            "features must be numeric; preprocess categorical columns"
+        )
+    if not np.isfinite(table.to_numpy(dtype=float)).all():
+        raise ValueError(
+            "features must not contain missing or infinite values"
+        )
+    return table
 
 
 @dataclass(frozen=True)
 class TableSchema:
-    """Expected shape for a supervised tabular dataset."""
+    """Required columns for a labelled numeric classification table."""
 
     target_column: str = "target"
-    required_columns: tuple[str, ...] = field(default_factory=tuple)
+    required_columns: tuple[str, ...] = ()
 
-    def validate(self, table: Any) -> Any:
-        """Validate that required columns exist and the table is non-empty."""
-        columns = _columns(table)
-        missing = [
-            column
-            for column in (*self.required_columns, self.target_column)
-            if column not in columns
-        ]
+    def validate(self, table: pd.DataFrame) -> pd.DataFrame:
+        missing = set((*self.required_columns, self.target_column)) - set(
+            table.columns
+        )
         if missing:
-            raise ValueError(f"missing required columns: {', '.join(missing)}")
-        if len(table) == 0:
-            raise ValueError("table must contain at least one row")
+            raise ValueError(
+                f"missing required columns: {', '.join(sorted(missing))}"
+            )
+        if not table.columns.is_unique:
+            raise ValueError("table columns must be unique")
+        validate_features(table.drop(columns=[self.target_column]))
+        if table[self.target_column].isna().any():
+            raise ValueError("target must not contain missing values")
         return table
 
 
-def validate_training_table(table: Any, target_column: str = "target") -> Any:
-    """Validate the default supervised training table."""
+def validate_training_table(
+    table: pd.DataFrame, target_column: str = "target"
+) -> pd.DataFrame:
+    """Validate feature and target columns before training or evaluation."""
     return TableSchema(target_column=target_column).validate(table)
