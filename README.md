@@ -1,96 +1,124 @@
 # MLOps Starter Kit
 
 [![CI](https://github.com/DiogoRibeiro7/mlops-starter-kit/actions/workflows/ci.yml/badge.svg)](https://github.com/DiogoRibeiro7/mlops-starter-kit/actions/workflows/ci.yml)
-[![PR Checks](https://github.com/DiogoRibeiro7/mlops-starter-kit/actions/workflows/pr.yml/badge.svg)](https://github.com/DiogoRibeiro7/mlops-starter-kit/actions/workflows/pr.yml)
 
-`mlops-starter-kit` is a package-first template for reproducible machine-learning workflows. It follows the same broad architecture as `mlops-python-package`: installable source code, explicit IO boundaries, config-driven jobs, local model registry primitives, CI checks, Docker entrypoints and maintained architecture documentation.
+A reusable Python template for numeric classification projects: validated
+configuration, reproducible training, model versioning, batch inference and
+a FastAPI prediction service.
 
-This repository remains generic. It does not copy the bike-demand dataset or domain-specific implementation from the reference project; instead it provides the same shape for a new MLOps codebase.
-
-## Architecture
-
-The project centers on an installable Python package and CLI:
-
-| Path | Responsibility |
-| --- | --- |
-| `src/mlops_starter_kit/core/` | Models, metrics and lightweight dataframe schemas |
-| `src/mlops_starter_kit/io/` | Configs, datasets, provenance, local registry and service boundaries |
-| `src/mlops_starter_kit/jobs/` | Training, tuning, inference, evaluation, explanation, promotion and rollback jobs |
-| `src/mlops_starter_kit/utils/` | Search, signature and splitting helpers plus compatibility utilities |
-| `confs/` | Example job configurations |
-| `tests/` | Unit and integration tests |
-| `documentation/` | Architecture notes and roadmap |
-| `tasks/` | `just` task fragments for local automation |
-
-See [`documentation/ARCHITECTURE.md`](documentation/ARCHITECTURE.md) for the component view and intentional limits.
-
-## Development Setup
-
-Install Poetry and create the environment from `pyproject.toml`:
-
-```bash
-pip install poetry
-poetry install
-```
-
-Run the same core checks used by CI:
-
-```bash
-make lint
-make test
-```
-
-If you use `just`, the task layout mirrors the reference project:
-
-```bash
-just --list
-just check
-just train
-```
+**Python 3.10-3.14 | Poetry 2.2.1 | MIT license**
 
 ## Quickstart
 
-Run the starter training job against the small example dataset:
+From a clone of this repository:
 
 ```bash
+python -m pip install poetry==2.2.1
+poetry sync
 poetry run mlops-starter-kit confs/training.yaml
-```
-
-That command loads `data/raw/example.csv`, validates the target column, trains a majority-class baseline, writes a model artifact under `artifacts/`, fingerprints the training data and registers the model in a local JSON registry.
-
-After training, evaluate the saved model:
-
-```bash
 poetry run mlops-starter-kit confs/evaluations.yaml
+poetry run mlops-starter-kit confs/inference.yaml
 ```
 
-Inspect the CLI schema:
+Training uses the included [synthetic dataset](data/README.md), evaluates a
+logistic regression on a held-out split, and creates:
+
+- An immutable model under `artifacts/models/baseline_model/v1.pkl`.
+- A registry entry containing metrics and model/data SHA-256 fingerprints.
+- A run record and resolved configuration under `artifacts/`.
+
+Each subsequent training run creates a new version. The example scores are
+a workflow check, not evidence of performance on real data.
+
+## Workflows
+
+| Command | Result |
+| --- | --- |
+| `mlops-starter-kit confs/training.yaml` | Train and register a version |
+| `mlops-starter-kit confs/tuning.yaml` | Cross-validate a parameter grid, evaluate the winner and register it |
+| `mlops-starter-kit confs/evaluations.yaml` | Evaluate a registered version on a labelled CSV |
+| `mlops-starter-kit confs/inference.yaml` | Write schema-checked predictions to CSV |
+| `mlops-starter-kit confs/explanations.yaml` | Write permutation feature importance |
+| `mlops-starter-kit confs/promotion.yaml` | Promote a version meeting an accuracy threshold |
+| `mlops-starter-kit confs/rollback.yaml` | Restore the previous promoted version |
+
+Prefix these commands with `poetry run`. Rollback requires two different
+versions to have been promoted. See the [workflow guide](docs/workflows.md)
+for model selection, promotion and serving.
+
+## Prediction API
+
+After training, set the model path and start the server:
 
 ```bash
+export MODEL_PATH=artifacts/models/baseline_model/v1.pkl
+poetry run uvicorn mlops_starter_kit.api:app --host 127.0.0.1 --port 8000
+```
+
+In PowerShell, use
+`$env:MODEL_PATH = "artifacts/models/baseline_model/v1.pkl"`.
+
+The API exposes `/healthz`, `/readyz`, `/predict` and OpenAPI docs at `/docs`.
+Without a model, liveness succeeds and readiness/prediction return HTTP 503.
+
+```bash
+curl http://127.0.0.1:8000/predict \
+  -H 'Content-Type: application/json' \
+  -d '{"instances":[{"feature1":1,"feature2":1}]}'
+```
+
+## Development
+
+```bash
+poetry run python scripts/check.py
+poetry run pre-commit install
+```
+
+The check command runs formatting, lint, typing and tests with a minimum
+85% branch-aware coverage requirement. `make check` and `just check` run the
+same checks. CI also tests the built wheel and both Docker targets.
+
+Validate configuration without executing a job:
+
+```bash
+poetry run mlops-starter-kit confs/training.yaml --validate
 poetry run mlops-starter-kit --schema
 ```
 
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the contribution process.
+
 ## Docker
 
-Build and run the serving image locally:
-
 ```bash
-docker build -f docker/serve.Dockerfile -t mlops-starter-kit:serve .
-docker run -p 8000:8000 mlops-starter-kit:serve
+docker build --target train -t mlops-starter-kit:train .
+docker build --target serve -t mlops-starter-kit:serve .
+docker volume create model-artifacts
+docker run --rm -v model-artifacts:/app/artifacts mlops-starter-kit:train
+docker run --rm -p 8000:8000 \
+  -v model-artifacts:/app/artifacts:ro \
+  -e MODEL_PATH=/app/artifacts/models/baseline_model/v1.pkl \
+  mlops-starter-kit:serve
 ```
 
-## Configuration
+The runtime uses an installed wheel and runs as a non-root user.
+PyTorch is an optional `deep-learning` extra:
+`poetry install --extras deep-learning`.
 
-Job configs live in `confs/` and use a small YAML subset that works without optional dependencies. The legacy `configs/` directory remains for compatibility with earlier examples.
+## Template Adoption
 
-Environment variables can still be stored in a `.env` file. Key variables include:
+1. Change the distribution name, import package, author and repository URLs.
+2. Replace the synthetic CSV with your data and define the feature contract.
+3. Select the model, validation strategy and promotion threshold.
+4. Configure deployment authentication, storage and secret management.
+5. Run the complete checks and container workflow before your first release.
 
-```text
-PROJECT_NAME
-DATASET_PATH
-DATASET_FILENAME
-TARGET_COL
-RAW_DIR
-PROCESSED_DIR
-ARTIFACTS_DIR
-```
+[Architecture](docs/architecture.md) | [Configuration](docs/configuration.md) |
+[Releases](docs/releases.md) | [Roadmap](docs/roadmap.md) | [Security](SECURITY.md)
+
+## Operational Scope
+
+This is a local reference implementation. The registry coordinates writers
+on one shared local filesystem; it is not a distributed model registry.
+Models use pickle and must come from a trusted source. The API has no built-in
+authentication; put authentication and TLS in front of it before exposing it
+outside a trusted environment. See [SECURITY.md](SECURITY.md).

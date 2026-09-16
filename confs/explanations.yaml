@@ -2,5 +2,9 @@ job:
   kind: explanations
 model:
   name: baseline_model
+  registry: artifacts/registry.json
+dataset:
+  path: data/raw/example.csv
+  target_column: target
 outputs:
   path: artifacts/explanations.json

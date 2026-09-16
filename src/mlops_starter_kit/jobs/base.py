@@ -1,49 +1,54 @@
-"""Base classes for high-level project jobs."""
+"""Shared configuration, logging and tracking lifecycle for jobs."""
 
-from __future__ import annotations
+from abc import ABC, abstractmethod
+import logging
+from pathlib import Path
+from types import TracebackType
+from typing import Any, ClassVar, Generic, TypeVar
 
-import abc
-from dataclasses import dataclass, field
-from typing import Any
+from mlops_starter_kit.core.configs import JobConfig
+from mlops_starter_kit.io.configs import load_config_file
+from mlops_starter_kit.io.services import LocalTrackingService
 
-from mlops_starter_kit.io.services import (
-    AlertsService,
-    LoggerService,
-    MlflowService,
-)
-
+ConfigT = TypeVar("ConfigT", bound=JobConfig)
 Locals = dict[str, Any]
 
 
-@dataclass
-class Job(abc.ABC):
-    """Base context manager for executable workflows."""
+class Job(ABC, Generic[ConfigT]):
+    """Validate before execution and retain a distinct record for every run."""
 
-    kind: str
-    logger_service: LoggerService = field(default_factory=LoggerService)
-    alerts_service: AlertsService = field(default_factory=AlertsService)
-    mlflow_service: MlflowService = field(default_factory=MlflowService)
+    kind: ClassVar[str]
+    config_type: type[ConfigT]
 
-    def __enter__(self) -> "Job":
-        self.logger_service.start()
-        self.alerts_service.start()
-        self.mlflow_service.start()
-        self.logger_service.logger().info("Starting %s job", self.kind)
+    def __init__(self, config: dict[str, Any] | ConfigT | None = None) -> None:
+        self.config = self.config_type.model_validate(config or {})
+        if self.config.job.kind != self.kind:
+            raise ValueError(f"expected job kind {self.kind!r}")
+        self.tracking = LocalTrackingService(
+            self.config.tracking.directory,
+            self.kind,
+            self.config.model_dump(mode="json"),
+        )
+        self.logger = logging.getLogger(f"mlops_starter_kit.jobs.{self.kind}")
+
+    @classmethod
+    def from_file(cls, path: str | Path) -> "Job[ConfigT]":
+        return cls(load_config_file(path))
+
+    def __enter__(self) -> "Job[ConfigT]":
+        self.tracking.start()
+        self.logger.info("Starting %s run %s", self.kind, self.tracking.run_id)
         return self
 
     def __exit__(
-        self, exc_type: object, exc_value: object, exc_traceback: object
-    ) -> bool:
-        logger = self.logger_service.logger()
-        if exc_value is None:
-            logger.info("Finished %s job", self.kind)
-        else:
-            logger.exception("%s job failed", self.kind)
-        self.mlflow_service.stop()
-        self.alerts_service.stop()
-        self.logger_service.stop()
-        return False
+        self,
+        exc_type: type[BaseException] | None,
+        exc_value: BaseException | None,
+        traceback: TracebackType | None,
+    ) -> None:
+        self.tracking.finish(exc_value)
+        self.logger.info("Finished %s run %s", self.kind, self.tracking.run_id)
 
-    @abc.abstractmethod
+    @abstractmethod
     def run(self) -> Locals:
-        """Run the job."""
+        """Execute a validated workflow."""

@@ -1,24 +1,27 @@
-"""Command line entrypoint for starter jobs."""
-
-from __future__ import annotations
+"""CLI with validation, machine-readable output and actionable errors."""
 
 import argparse
 import json
+import logging
 from pathlib import Path
-from typing import Sequence
+import sys
+from typing import Any, Sequence
 
+from mlops_starter_kit.version import __version__
+from mlops_starter_kit.io.artifacts import json_default
 from mlops_starter_kit.io.configs import load_config_file
 from mlops_starter_kit.jobs import (
     EvaluationsJob,
     ExplanationsJob,
     InferenceJob,
+    Job,
     PromotionJob,
     RollbackJob,
     TrainingJob,
     TuningJob,
 )
 
-JOB_TYPES = {
+JOB_TYPES: dict[str, type[Job[Any]]] = {
     "training": TrainingJob,
     "tuning": TuningJob,
     "inference": InferenceJob,
@@ -29,59 +32,68 @@ JOB_TYPES = {
 }
 
 
-def schema() -> dict[str, object]:
-    """Return a compact CLI schema."""
+def schema() -> dict[str, Any]:
     return {
         "usage": "mlops-starter-kit CONFIG",
         "job_kinds": sorted(JOB_TYPES),
-        "config": {"job": {"kind": "training"}},
+        "schemas": {
+            kind: job.config_type.model_json_schema()
+            for kind, job in JOB_TYPES.items()
+        },
     }
 
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        description="Run an MLOps starter-kit job"
+        description="Run a reproducible MLOps job"
+    )
+    parser.add_argument("config", nargs="?", default="confs/training.yaml")
+    parser.add_argument("--version", action="version", version=__version__)
+    parser.add_argument(
+        "--schema", action="store_true", help="Print job JSON schemas"
     )
     parser.add_argument(
-        "config",
-        nargs="?",
-        default="confs/training.yaml",
-        help="Path to a job config",
+        "--validate", action="store_true", help="Validate without running"
     )
     parser.add_argument(
-        "--schema",
-        action="store_true",
-        help="Print the starter job schema and exit",
+        "--debug", action="store_true", help="Show tracebacks on failure"
     )
     return parser
 
 
-def job_from_config(path: str | Path):
-    """Create a job instance from a config file."""
+def job_from_config(path: str | Path) -> Job[Any]:
     config = load_config_file(path)
-    kind = config.get("job", {}).get("kind", Path(path).stem)
-    try:
-        job_type = JOB_TYPES[str(kind)]
-    except KeyError as exc:
-        raise ValueError(f"unsupported job kind: {kind}") from exc
-    return job_type(config)
+    job_spec = config.get("job", {})
+    if not isinstance(job_spec, dict):
+        raise ValueError("job must be a mapping with a kind field")
+    kind = job_spec.get("kind", Path(path).stem)
+    if not isinstance(kind, str) or kind not in JOB_TYPES:
+        raise ValueError(f"unsupported job kind: {kind}")
+    return JOB_TYPES[kind](config)
 
 
 def main(argv: Sequence[str] | None = None) -> int:
-    """CLI entrypoint."""
     args = build_parser().parse_args(argv)
-    if args.schema:
-        print(json.dumps(schema(), indent=2))
-        return 0
-    job = job_from_config(args.config)
-    with job:
-        result = job.run()
-    print(
-        json.dumps(
-            {key: str(value) for key, value in result.items()}, indent=2
+    logging.basicConfig(level=logging.DEBUG if args.debug else logging.INFO)
+    try:
+        if args.schema:
+            result = schema()
+        else:
+            job = job_from_config(args.config)
+            if args.validate:
+                result = job.config.model_dump(mode="json")
+            else:
+                with job:
+                    result = job.run()
+        print(
+            json.dumps(result, indent=2, allow_nan=False, default=json_default)
         )
-    )
-    return 0
+        return 0
+    except (OSError, ValueError, TypeError) as exc:
+        if args.debug:
+            raise
+        print(f"error: {exc}", file=sys.stderr)
+        return 1
 
 
 if __name__ == "__main__":

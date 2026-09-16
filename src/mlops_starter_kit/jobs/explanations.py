@@ -1,50 +1,47 @@
-"""Model explanation placeholder workflow."""
+"""Permutation feature importance against a labelled evaluation table."""
 
-from __future__ import annotations
+from sklearn.inspection import permutation_importance
 
-import json
-from dataclasses import dataclass
-from pathlib import Path
-from typing import Any
-
-from mlops_starter_kit.io.configs import load_job_config
+from mlops_starter_kit.core.configs import ExplanationConfig
+from mlops_starter_kit.io.artifacts import write_json
+from mlops_starter_kit.io.datasets import load_table, split_features_target
+from mlops_starter_kit.io.models import resolve_model
 from mlops_starter_kit.jobs.base import Job, Locals
-from mlops_starter_kit.settings import ARTIFACTS_DIR
-
-DEFAULT_EXPLANATION_CONFIG: dict[str, Any] = {
-    "job": {"kind": "explanations"},
-    "model": {"name": "baseline_model"},
-    "outputs": {"path": str(ARTIFACTS_DIR / "explanations.json")},
-}
 
 
-@dataclass
-class ExplanationsJob(Job):
-    """Write a starter explanation artifact."""
-
-    config: dict[str, Any] | None = None
-
-    def __init__(self, config: dict[str, Any] | None = None) -> None:
-        super().__init__(kind="explanations")
-        self.config = config or DEFAULT_EXPLANATION_CONFIG
-
-    @classmethod
-    def from_file(cls, path: str | Path) -> "ExplanationsJob":
-        return cls(load_job_config(path, DEFAULT_EXPLANATION_CONFIG))
+class ExplanationsJob(Job[ExplanationConfig]):
+    kind = "explanations"
+    config_type = ExplanationConfig
 
     def run(self) -> Locals:
-        config = self.config or DEFAULT_EXPLANATION_CONFIG
-        output_path = Path(config["outputs"]["path"])
-        output_path.parent.mkdir(parents=True, exist_ok=True)
-        explanation = {
-            "model": config["model"]["name"],
-            "method": "baseline_summary",
-            "notes": (
-                "Replace with SHAP, PDP or domain-specific explanation "
-                "once a real model is added."
-            ),
-        }
-        output_path.write_text(
-            json.dumps(explanation, indent=2) + "\n", encoding="utf-8"
+        artifact = resolve_model(self.config.model)
+        features, target = split_features_target(
+            load_table(self.config.dataset.path),
+            self.config.dataset.target_column,
         )
-        return {"explanation": explanation, "output_path": output_path}
+        importance = permutation_importance(
+            artifact.estimator,
+            artifact.prepare(features),
+            target,
+            scoring="accuracy",
+            n_repeats=self.config.repeats,
+            random_state=self.config.dataset.random_seed,
+            n_jobs=1,
+        )
+        explanation = {
+            "method": "permutation_importance",
+            "scoring": "accuracy",
+            "features": [
+                {"name": name, "mean": float(mean), "std": float(std)}
+                for name, mean, std in zip(
+                    artifact.features,
+                    importance.importances_mean,
+                    importance.importances_std,
+                )
+            ],
+        }
+        write_json(self.config.outputs.path, explanation)
+        return {
+            "explanation": explanation,
+            "output_path": self.config.outputs.path,
+        }

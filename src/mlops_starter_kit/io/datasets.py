@@ -1,63 +1,51 @@
-"""Dataset loading and splitting helpers."""
+"""CSV loading and reproducible supervised dataset splits."""
 
-from __future__ import annotations
-
-import random
+import math
 from pathlib import Path
-from typing import Any, Iterable
+from typing import Any
 
-from pandas import DataFrame, read_csv
+import pandas as pd
+from sklearn.model_selection import train_test_split as sklearn_split
 
-
-def _value_at(column: Any, index: int) -> Any:
-    if hasattr(column, "iloc"):
-        return column.iloc[index]
-    return column[index]
+from mlops_starter_kit.core.schemas import validate_training_table
 
 
-def _subset(table: DataFrame, indices: Iterable[int]) -> DataFrame:
-    index_list = list(indices)
-    return DataFrame(
-        {
-            column: [_value_at(table[column], index) for index in index_list]
-            for column in list(table.columns)
-        }
-    )
-
-
-def load_table(path: str | Path) -> DataFrame:
-    """Load a CSV table."""
-    return read_csv(path)
+def load_table(path: str | Path) -> pd.DataFrame:
+    return pd.read_csv(path)
 
 
 def split_features_target(
-    table: DataFrame, target_column: str
-) -> tuple[DataFrame, list[Any]]:
-    """Split a supervised table into features and target values."""
-    features = table.drop(columns=[target_column])
-    target = [
-        _value_at(table[target_column], index) for index in range(len(table))
-    ]
-    return features, target
+    table: pd.DataFrame, target_column: str
+) -> tuple[pd.DataFrame, list[Any]]:
+    validate_training_table(table, target_column)
+    return table.drop(columns=[target_column]), table[target_column].tolist()
 
 
 def train_test_split(
-    table: DataFrame,
+    table: pd.DataFrame,
     target_column: str,
     test_size: float = 0.2,
     random_state: int = 42,
-) -> tuple[DataFrame, DataFrame, list[Any], list[Any]]:
-    """Split rows into train/test partitions."""
-    if not 0 < test_size < 1:
-        raise ValueError("test_size must be between 0 and 1")
-    indices = list(range(len(table)))
-    random.Random(random_state).shuffle(indices)
-    test_len = max(1, int(len(indices) * test_size))
-    test_indices = indices[:test_len]
-    train_indices = indices[test_len:]
-
-    train_table = _subset(table, train_indices)
-    test_table = _subset(table, test_indices)
-    x_train, y_train = split_features_target(train_table, target_column)
-    x_test, y_test = split_features_target(test_table, target_column)
+) -> tuple[pd.DataFrame, pd.DataFrame, list[Any], list[Any]]:
+    """Stratify when both partitions can represent all classes."""
+    features, target = split_features_target(table, target_column)
+    if len(table) < 2 or not 0 < test_size < 1:
+        raise ValueError(
+            "split requires at least two rows and 0 < test_size < 1"
+        )
+    counts = table[target_column].value_counts()
+    test_rows = max(1, math.ceil(len(table) * test_size))
+    stratify = (
+        target
+        if counts.min() >= 2
+        and min(test_rows, len(table) - test_rows) >= len(counts)
+        else None
+    )
+    x_train, x_test, y_train, y_test = sklearn_split(
+        features,
+        target,
+        test_size=test_size,
+        random_state=random_state,
+        stratify=stratify,
+    )
     return x_train, x_test, y_train, y_test

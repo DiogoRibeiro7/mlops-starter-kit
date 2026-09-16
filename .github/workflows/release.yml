@@ -1,0 +1,33 @@
+name: Release Artifacts
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
+        with:
+          python-version: "3.13"
+      - run: pip install poetry==2.2.1
+      - run: poetry sync
+      - name: Verify tag matches package version
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          poetry run python -c "import os; from mlops_starter_kit.version import __version__; assert os.environ['RELEASE_TAG'] == 'v' + __version__, 'tag and package version differ'"
+      - run: poetry check --lock
+      - run: poetry run python scripts/check.py
+      - run: poetry build
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: release-distributions
+          path: dist/
+          if-no-files-found: error

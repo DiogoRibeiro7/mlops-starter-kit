@@ -9,3 +9,11 @@ dist
 build
 htmlcov
 notebooks/.ipynb_checkpoints
+.env
+.env.*
+**/__pycache__
+**/*.pyc
+.coverage
+coverage.xml
+tests
+notebooks

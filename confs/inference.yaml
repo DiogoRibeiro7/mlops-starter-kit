@@ -3,6 +3,7 @@ job:
 dataset:
   path: data/raw/example.csv
 model:
-  path: artifacts/baseline_model.pkl
+  registry: artifacts/registry.json
+  name: baseline_model
 outputs:
   path: artifacts/predictions.csv

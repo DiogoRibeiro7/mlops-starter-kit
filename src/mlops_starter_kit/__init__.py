@@ -9,8 +9,10 @@ from .utils import (
     split_data,
     train_model,
 )
+from .version import __version__
 
 __all__ = [
+    "__version__",
     "evaluate_model",
     "get_config_and_logger",
     "load_data",

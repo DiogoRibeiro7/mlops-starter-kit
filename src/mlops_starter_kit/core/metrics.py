@@ -1,46 +1,24 @@
-"""Metric functions used by jobs and tests."""
-
-from __future__ import annotations
+"""Classification metrics with explicit binary and multiclass behavior."""
 
 from typing import Any, Iterable
+
+from sklearn.metrics import accuracy_score, precision_recall_fscore_support
 
 
 def classification_metrics(
     y_true: Iterable[Any], y_pred: Iterable[Any]
 ) -> dict[str, float]:
-    """Return accuracy, precision, recall and F1 for binary labels.
-
-    The starter kit intentionally keeps this implementation dependency-light.
-    For multiclass work, replace this function with scikit-learn metrics.
-    """
-    true_values = list(y_true)
-    pred_values = list(y_pred)
-    if len(true_values) != len(pred_values):
-        raise ValueError("y_true and y_pred must have the same length")
-
-    tp = fp = tn = fn = 0
-    for truth, prediction in zip(true_values, pred_values):
-        if prediction == 1 and truth == 1:
-            tp += 1
-        elif prediction == 1 and truth == 0:
-            fp += 1
-        elif prediction == 0 and truth == 0:
-            tn += 1
-        elif prediction == 0 and truth == 1:
-            fn += 1
-
-    total = len(true_values)
-    accuracy = (tp + tn) / total if total else 0.0
-    precision = tp / (tp + fp) if (tp + fp) else 0.0
-    recall = tp / (tp + fn) if (tp + fn) else 0.0
-    f1 = (
-        (2 * precision * recall) / (precision + recall)
-        if (precision + recall)
-        else 0.0
+    """Use binary averaging for 0/1 labels, weighted averaging otherwise."""
+    truth, predictions = list(y_true), list(y_pred)
+    if not truth or len(truth) != len(predictions):
+        raise ValueError("labels must be non-empty and have the same length")
+    average = "binary" if set(truth + predictions) <= {0, 1} else "weighted"
+    precision, recall, f1, _ = precision_recall_fscore_support(
+        truth, predictions, average=average, zero_division=0
     )
     return {
-        "accuracy": accuracy,
-        "precision": precision,
-        "recall": recall,
-        "f1": f1,
+        "accuracy": float(accuracy_score(truth, predictions)),
+        "precision": float(precision),
+        "recall": float(recall),
+        "f1": float(f1),
     }

@@ -1,34 +1,33 @@
-.PHONY: dev data train test serve lint schema evaluate clean
+.PHONY: install check lint format test train evaluate serve schema data
 
-dev:
-	docker run --rm -it \
-	  --mount type=bind,src=$(PWD),dst=/workspace \
-	  --workdir /workspace \
-	  -v ~/.cache:/home/vscode/.cache \
-	  mcr.microsoft.com/vscode/devcontainers/base:ubuntu \
-	  /bin/bash
+install:
+	poetry sync
 
-data:
-	poetry run python -m mlops_starter_kit.data
+check:
+	poetry check --lock
+	poetry run python scripts/check.py
+
+lint:
+	poetry run flake8 src tests scripts
+	poetry run mypy
+
+format:
+	poetry run black src tests scripts
+
+test:
+	poetry run pytest --cov --cov-report=term-missing
 
 train:
 	poetry run mlops-starter-kit confs/training.yaml
 
-test:
-	poetry run pytest --maxfail=1 --disable-warnings -q
-
-lint:
-	pre-commit run --files $(shell git ls-files '*.py')
+evaluate:
+	poetry run mlops-starter-kit confs/evaluations.yaml
 
 schema:
 	poetry run mlops-starter-kit --schema
 
-evaluate:
-	poetry run mlops-starter-kit confs/evaluations.yaml
-
 serve:
-	docker build -f docker/serve.Dockerfile -t mlops-starter-kit:serve .
-	docker run -p 8000:8000 mlops-starter-kit:serve
+	poetry run uvicorn mlops_starter_kit.api:app --host 127.0.0.1 --port 8000
 
-clean:
-	rm -rf artifacts .pytest_cache htmlcov dist build
+data:
+	poetry run python -m mlops_starter_kit.data data/raw/example.csv data/processed/example.csv

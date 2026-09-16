@@ -1,14 +1,19 @@
 repos:
-  - repo: https://github.com/psf/black
-    rev: 23.7.0
+  - repo: local
     hooks:
-      - id: black
-  - repo: https://github.com/pycqa/flake8
-    rev: 6.1.0
-    hooks:
-      - id: flake8
-  - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.5.1
-    hooks:
-      - id: mypy
-        additional_dependencies: [types-requests]
+      - id: format
+        name: Black
+        entry: poetry run black
+        language: system
+        types: [python]
+      - id: lint
+        name: Flake8
+        entry: poetry run flake8
+        language: system
+        types: [python]
+      - id: types
+        name: Mypy
+        entry: poetry run mypy
+        language: system
+        pass_filenames: false
+        types: [python]
