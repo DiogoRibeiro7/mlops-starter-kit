@@ -1,0 +1,11 @@
+.git
+.github
+.pytest_cache
+.mypy_cache
+.ruff_cache
+.venv
+artifacts
+dist
+build
+htmlcov
+notebooks/.ipynb_checkpoints

@@ -1,0 +1,8 @@
+job:
+  kind: inference
+dataset:
+  path: data/raw/example.csv
+model:
+  path: artifacts/baseline_model.pkl
+outputs:
+  path: artifacts/predictions.csv

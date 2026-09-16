@@ -1,0 +1,7 @@
+job:
+  kind: rollback
+registry:
+  path: artifacts/registry.json
+rollback:
+  alias: champion
+  reason: manual rollback

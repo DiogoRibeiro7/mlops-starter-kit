@@ -1,8 +1,10 @@
 """Minimal stub of the pandas API used in tests."""
+
 from __future__ import annotations
 import csv
 import os
 from typing import Dict, List, Iterable, Any
+
 
 class DataFrame:
     def __init__(self, data: Dict[str, Iterable[Any]]):
@@ -24,10 +26,13 @@ class DataFrame:
         new_data = {k: v for k, v in self._data.items() if k not in columns}
         return DataFrame(new_data)
 
+
 def read_csv(path: str | bytes | os.PathLike) -> DataFrame:
     with open(path, newline="") as f:
         reader = csv.DictReader(f)
-        data: Dict[str, List[Any]] = {field: [] for field in reader.fieldnames or []}
+        data: Dict[str, List[Any]] = {
+            field: [] for field in reader.fieldnames or []
+        }
         for row in reader:
             for k, v in row.items():
                 try:

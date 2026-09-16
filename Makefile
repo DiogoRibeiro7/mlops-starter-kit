@@ -1,4 +1,4 @@
-.PHONY: dev data train test serve lint
+.PHONY: dev data train test serve lint schema evaluate clean
 
 dev:
 	docker run --rm -it \
@@ -9,17 +9,26 @@ dev:
 	  /bin/bash
 
 data:
-	python -m src.mlops_starter_kit.data
+	poetry run python -m mlops_starter_kit.data
 
 train:
-	python -m src.mlops_starter_kit.modeling.train
+	poetry run mlops-starter-kit confs/training.yaml
 
 test:
-        pytest --maxfail=1 --disable-warnings -q
+	poetry run pytest --maxfail=1 --disable-warnings -q
 
 lint:
-        pre-commit run --files $(shell git ls-files '*.py')
+	pre-commit run --files $(shell git ls-files '*.py')
+
+schema:
+	poetry run mlops-starter-kit --schema
+
+evaluate:
+	poetry run mlops-starter-kit confs/evaluations.yaml
 
 serve:
 	docker build -f docker/serve.Dockerfile -t mlops-starter-kit:serve .
 	docker run -p 8000:8000 mlops-starter-kit:serve
+
+clean:
+	rm -rf artifacts .pytest_cache htmlcov dist build

@@ -1,5 +1,5 @@
-from pathlib import Path
 from .config import RAW_DIR, PROCESSED_DIR
+
 
 def load_raw_data():
     """
@@ -10,11 +10,12 @@ def load_raw_data():
 
     Notes:
         - Assumes RAW_DIR is a predefined directory path.
-        - Assumes load_csv is a function that loads a CSV file and returns its contents.
+        - Assumes load_csv loads a CSV file and returns its contents.
     """
     raw_files = list(RAW_DIR.glob("*.csv"))
     data = [load_csv(file) for file in raw_files]
     return data
+
 
 def load_csv(path):
     """
@@ -27,11 +28,13 @@ def load_csv(path):
         pandas.DataFrame: The contents of the CSV file as a DataFrame.
     """
     import pandas as pd
+
     return pd.read_csv(path)
+
 
 def save_processed_data(df, filename: str):
     """
-    Saves a processed pandas DataFrame to a CSV file in the processed data directory.
+    Saves a pandas DataFrame to CSV in the processed data directory.
 
     Args:
         df (pandas.DataFrame): The DataFrame to be saved.
@@ -41,12 +44,13 @@ def save_processed_data(df, filename: str):
         pathlib.Path: The path to the saved CSV file.
 
     Raises:
-        OSError: If the directory cannot be created or the file cannot be written.
+        OSError: If creating the directory or writing the file fails.
     """
     PROCESSED_DIR.mkdir(parents=True, exist_ok=True)
     out_path = PROCESSED_DIR / filename
     df.to_csv(out_path, index=False)
     return out_path
+
 
 if __name__ == "__main__":
     try:
@@ -55,6 +59,7 @@ if __name__ == "__main__":
         # TODO: implement data cleaning and invoke save_processed_data
     except Exception as e:
         print(f"An error occurred: {e}")
+
     def clean_data(df):
         """
         Placeholder function for data cleaning.

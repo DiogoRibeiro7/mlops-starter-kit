@@ -1,0 +1,6 @@
+job:
+  kind: explanations
+model:
+  name: baseline_model
+outputs:
+  path: artifacts/explanations.json

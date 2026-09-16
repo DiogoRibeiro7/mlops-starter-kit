@@ -26,4 +26,3 @@ def test_get_config_and_logger() -> None:
     cfg = config.get_config_and_logger()
     assert cfg.project.name == "mlops-starter"
     assert logging.getLogger().handlers
-

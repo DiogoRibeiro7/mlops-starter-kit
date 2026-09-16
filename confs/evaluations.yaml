@@ -1,0 +1,7 @@
+job:
+  kind: evaluations
+dataset:
+  path: data/raw/example.csv
+  target_column: target
+model:
+  path: artifacts/baseline_model.pkl
