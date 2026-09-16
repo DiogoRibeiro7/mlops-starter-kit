@@ -27,6 +27,20 @@ describe the problem, resulting behavior and validation. Update the docs
 and `CHANGELOG.md` when changing a public workflow. Maintainers should merge
 only after all CI jobs pass.
 
+## Roadmap Work
+
+Use the [next-work queue](docs/roadmap.md#next-work-queue) to select planned work.
+Before implementing a roadmap task, open an issue with its stable task ID,
+proposed owner, scope, dependencies and acceptance tests. Agree scope with a
+maintainer, link the issue from the PR and include validation evidence.
+Bug fixes and small maintenance changes do not need a roadmap milestone.
+
+Update the [delivery plan](docs/roadmap.md#tracking-and-review) in the same PR
+when progress changes. Keep tasks incomplete until their acceptance criteria
+are met; distinguish implemented code from released or operationally verified
+capabilities. Propose scope or priority changes explicitly instead of silently
+adding a new integration to an existing task.
+
 ## Dependencies
 
 Declare directly imported dependencies in `pyproject.toml`; keep optional
