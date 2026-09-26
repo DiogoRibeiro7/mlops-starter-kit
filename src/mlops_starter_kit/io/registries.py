@@ -9,6 +9,7 @@ import shutil
 from typing import Any
 
 from filelock import FileLock
+from dataexcept import FileReadError, wrapping
 from pydantic import TypeAdapter
 
 from mlops_starter_kit.core.configs import Name
@@ -39,7 +40,10 @@ class LocalModelRegistry:
     def _read(self) -> dict[str, Any]:
         if not self.path.exists():
             return {"models": {}, "aliases": {}, "history": [], "stacks": {}}
-        state = json.loads(self.path.read_text(encoding="utf-8"))
+        with wrapping(
+            (OSError, UnicodeError), FileReadError, path=str(self.path)
+        ):
+            state = json.loads(self.path.read_text(encoding="utf-8"))
         state.setdefault("stacks", {})
         return state
 

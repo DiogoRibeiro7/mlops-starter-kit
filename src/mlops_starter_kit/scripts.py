@@ -7,6 +7,8 @@ from pathlib import Path
 import sys
 from typing import Any, Sequence
 
+from dataexcept import DataExceptError
+
 from mlops_starter_kit.version import __version__
 from mlops_starter_kit.io.artifacts import json_default
 from mlops_starter_kit.io.configs import load_config_file
@@ -89,7 +91,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             json.dumps(result, indent=2, allow_nan=False, default=json_default)
         )
         return 0
-    except (OSError, ValueError, TypeError) as exc:
+    except (OSError, DataExceptError, ValueError, TypeError) as exc:
         if args.debug:
             raise
         print(f"error: {exc}", file=sys.stderr)
