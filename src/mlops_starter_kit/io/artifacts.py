@@ -10,6 +10,7 @@ import tempfile
 from typing import Any
 
 import numpy as np
+from dataexcept import FileReadError, FileWriteError, wrapping
 
 from mlops_starter_kit.core.models import ModelArtifact
 
@@ -26,34 +27,41 @@ def json_default(value: Any) -> Any:
 
 def write_json(path: Path, data: Any) -> None:
     """Replace a complete JSON document atomically on the same filesystem."""
-    path.parent.mkdir(parents=True, exist_ok=True)
-    fd, temporary = tempfile.mkstemp(dir=path.parent, suffix=".tmp")
-    try:
-        with os.fdopen(fd, "w", encoding="utf-8") as stream:
-            json.dump(
-                data, stream, indent=2, allow_nan=False, default=json_default
-            )
-            stream.write("\n")
-            stream.flush()
-            os.fsync(stream.fileno())
-        os.replace(temporary, path)
-    finally:
-        Path(temporary).unlink(missing_ok=True)
+    with wrapping(OSError, FileWriteError, path=str(path)):
+        path.parent.mkdir(parents=True, exist_ok=True)
+        fd, temporary = tempfile.mkstemp(dir=path.parent, suffix=".tmp")
+        try:
+            with os.fdopen(fd, "w", encoding="utf-8") as stream:
+                json.dump(
+                    data,
+                    stream,
+                    indent=2,
+                    allow_nan=False,
+                    default=json_default,
+                )
+                stream.write("\n")
+                stream.flush()
+                os.fsync(stream.fileno())
+            os.replace(temporary, path)
+        finally:
+            Path(temporary).unlink(missing_ok=True)
 
 
 def file_sha256(path: Path) -> str:
     digest = hashlib.sha256()
-    with path.open("rb") as stream:
-        for chunk in iter(lambda: stream.read(1024 * 1024), b""):
-            digest.update(chunk)
+    with wrapping(OSError, FileReadError, path=str(path)):
+        with path.open("rb") as stream:
+            for chunk in iter(lambda: stream.read(1024 * 1024), b""):
+                digest.update(chunk)
     return digest.hexdigest()
 
 
 def save_artifact(artifact: ModelArtifact, path: Path) -> None:
     """Create an artifact without overwriting an existing model."""
-    path.parent.mkdir(parents=True, exist_ok=True)
-    with path.open("xb") as stream:
-        pickle.dump(artifact, stream, protocol=pickle.HIGHEST_PROTOCOL)
+    with wrapping(OSError, FileWriteError, path=str(path)):
+        path.parent.mkdir(parents=True, exist_ok=True)
+        with path.open("xb") as stream:
+            pickle.dump(artifact, stream, protocol=pickle.HIGHEST_PROTOCOL)
 
 
 def load_artifact(
@@ -64,7 +72,8 @@ def load_artifact(
     Pickle can execute code. Only load artifacts produced in a trusted
     environment; a checksum detects corruption, not a malicious publisher.
     """
-    payload = path.read_bytes()
+    with wrapping(OSError, FileReadError, path=str(path)):
+        payload = path.read_bytes()
     if (
         expected_sha256
         and hashlib.sha256(payload).hexdigest() != expected_sha256

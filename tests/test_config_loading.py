@@ -2,6 +2,7 @@
 
 import json
 
+from dataexcept import FileReadError
 import pytest
 from pydantic import ValidationError
 
@@ -19,6 +20,15 @@ def test_yaml_preserves_quotes_lists_and_comments(tmp_path):
         "values": [1, 2, 3],
         "flag": True,
     }
+
+
+def test_missing_config_keeps_path_and_cause(tmp_path):
+    path = tmp_path / "missing.yaml"
+    with pytest.raises(FileReadError) as error:
+        load_config_file(path)
+    assert error.value.path == str(path)
+    assert isinstance(error.value.original, FileNotFoundError)
+    assert error.value.__cause__ is error.value.original
 
 
 @pytest.mark.parametrize(

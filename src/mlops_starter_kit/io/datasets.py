@@ -5,13 +5,18 @@ from pathlib import Path
 from typing import Any
 
 import pandas as pd
+from dataexcept import DataLoadingError, FileReadError, wrapping
 from sklearn.model_selection import train_test_split as sklearn_split
 
 from mlops_starter_kit.core.schemas import validate_training_table
 
 
 def load_table(path: str | Path) -> pd.DataFrame:
-    return pd.read_csv(path)
+    with wrapping((OSError, UnicodeError), FileReadError, path=str(path)):
+        with wrapping(
+            pd.errors.ParserError, DataLoadingError, source=str(path)
+        ):
+            return pd.read_csv(path)
 
 
 def split_features_target(

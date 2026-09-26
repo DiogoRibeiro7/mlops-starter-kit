@@ -5,14 +5,18 @@ import pickle
 
 import numpy as np
 import pandas as pd
+from dataexcept import DataLoadingError, FileReadError, FileWriteError
 import pytest
 
 from mlops_starter_kit.data import ingest
 from mlops_starter_kit.io.artifacts import (
+    file_sha256,
     json_default,
     load_artifact,
+    save_artifact,
     write_json,
 )
+from mlops_starter_kit.io.datasets import load_table
 from mlops_starter_kit.io.provenance import (
     dataframe_fingerprint,
     write_fingerprint,
@@ -67,3 +71,58 @@ def test_ingestion_validates_and_creates_parent_directory(dataset, tmp_path):
     with pytest.raises(ValueError):
         ingest(invalid, tmp_path / "invalid-output.csv")
     assert not (tmp_path / "invalid-output.csv").exists()
+
+
+def test_csv_loading_identifies_missing_and_malformed_files(tmp_path):
+    missing = tmp_path / "missing.csv"
+    with pytest.raises(FileReadError) as error:
+        load_table(missing)
+    assert error.value.path == str(missing)
+    assert isinstance(error.value.original, FileNotFoundError)
+    assert error.value.__cause__ is error.value.original
+
+    malformed = tmp_path / "malformed.csv"
+    malformed.write_text('feature,target\n"unterminated,0\n')
+    with pytest.raises(DataLoadingError) as error:
+        load_table(malformed)
+    assert error.value.source == str(malformed)
+    assert isinstance(error.value.original, pd.errors.ParserError)
+    assert error.value.__cause__ is error.value.original
+
+
+def test_artifact_file_failures_keep_path_and_cause(tmp_path):
+    missing = tmp_path / "missing.pkl"
+    for load in (load_artifact, file_sha256):
+        with pytest.raises(FileReadError) as error:
+            load(missing)
+        assert error.value.path == str(missing)
+        assert isinstance(error.value.original, FileNotFoundError)
+        assert error.value.__cause__ is error.value.original
+
+    destination = tmp_path / "existing.pkl"
+    destination.write_bytes(b"existing")
+    with pytest.raises(FileWriteError) as error:
+        save_artifact(object(), destination)
+    assert error.value.path == str(destination)
+    assert isinstance(error.value.original, FileExistsError)
+    assert destination.read_bytes() == b"existing"
+
+
+def test_atomic_metadata_write_failure_keeps_existing_data(tmp_path):
+    destination = tmp_path / "existing-dir"
+    destination.mkdir()
+    with pytest.raises(FileWriteError) as error:
+        write_json(destination, {"version": 1})
+    assert error.value.path == str(destination)
+    assert isinstance(error.value.original, OSError)
+    assert error.value.__cause__ is error.value.original
+    assert not list(tmp_path.glob("*.tmp"))
+
+
+def test_ingest_write_failure_keeps_path_and_cause(dataset, tmp_path):
+    destination = tmp_path / "existing-dir"
+    destination.mkdir()
+    with pytest.raises(FileWriteError) as error:
+        ingest(dataset, destination)
+    assert error.value.path == str(destination)
+    assert isinstance(error.value.original, OSError)

@@ -6,6 +6,7 @@ import subprocess
 import sys
 
 import pytest
+from dataexcept import FileReadError
 
 from mlops_starter_kit.scripts import main
 
@@ -65,5 +66,14 @@ def test_cli_reports_error_without_traceback(text, tmp_path, capsys):
 
 
 def test_debug_preserves_traceback(tmp_path):
-    with pytest.raises(FileNotFoundError):
+    with pytest.raises(FileReadError) as error:
         main([str(tmp_path / "missing.yaml"), "--debug"])
+    assert isinstance(error.value.__cause__, FileNotFoundError)
+
+
+def test_missing_config_reports_path_without_traceback(tmp_path, capsys):
+    missing = tmp_path / "missing.yaml"
+    assert main([str(missing)]) == 1
+    output = capsys.readouterr()
+    assert str(missing) in output.err
+    assert "Traceback" not in output.err

@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 
 import pandas as pd
+from dataexcept import FileReadError
 import pytest
 
 from mlops_starter_kit.io.artifacts import load_artifact
@@ -98,8 +99,10 @@ def test_tuning_rejects_insufficient_class_support(training_config):
 def test_failed_run_is_recorded(training_config):
     training_config["dataset"]["path"] = "missing.csv"
     job = TrainingJob(training_config)
-    with pytest.raises(FileNotFoundError):
+    with pytest.raises(FileReadError) as error:
         run(job)
+    assert error.value.path == "missing.csv"
+    assert isinstance(error.value.__cause__, FileNotFoundError)
     record = json.loads(job.tracking.path.read_text())
     assert record["status"] == "failed"
     assert record["error"]

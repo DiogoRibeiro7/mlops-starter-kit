@@ -6,12 +6,16 @@ from pathlib import Path
 from typing import Any
 
 import yaml
+from dataexcept import FileReadError, wrapping
 
 
 def load_config_file(path: str | Path) -> dict[str, Any]:
     """Read a JSON or YAML mapping; paths inside it are relative to cwd."""
     config_path = Path(path)
-    text = config_path.read_text(encoding="utf-8")
+    with wrapping(
+        (OSError, UnicodeError), FileReadError, path=str(config_path)
+    ):
+        text = config_path.read_text(encoding="utf-8")
     try:
         config = (
             json.loads(text)
