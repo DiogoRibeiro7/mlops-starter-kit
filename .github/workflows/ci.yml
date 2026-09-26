@@ -71,10 +71,11 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
-      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
+      - uses: DiogoRibeiro7/git-actions-collection/.github/actions/setup-poetry@v1
         with:
           python-version: "3.13"
-      - run: pip install "poetry==$POETRY_VERSION"
+          poetry-version: "2.2.1"
+          install-deps: "false"
       - run: poetry sync
       - run: poetry build
       - run: poetry run pip install --force-reinstall --no-deps dist/*.whl
