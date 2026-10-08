@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/project-avatar.png" alt="mlops-starter-kit project logo" width="160" height="160">
+  <img src="assets/project-logo.png" alt="mlops-starter-kit project logo" width="160" height="160">
 </p>
 
 # MLOps Starter Kit

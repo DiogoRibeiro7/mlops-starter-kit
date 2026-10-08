@@ -1,0 +1,7 @@
+Tool: built-in image generation
+
+Use case: logo-brand.
+Asset type: square project logo for mlops-starter-kit.
+Project purpose: A tested Python MLOps starter kit for tabular classification, with reproducible scikit-learn training, local model versioning, batch inference, FastAPI serving, Docker, and CI.
+Design direction: A playful modular toy identity: three chunky matte building blocks interlock into a short working production line, with a cyan input block, magenta central model block, and lemon-yellow output block. Small simple connector pegs, pleasing isometric construction, white studio background and soft shadows. Tactile painted wooden toy design, no toolbox, no gold, no labels.
+Composition: one finished square image, visually distinctive and readable at 160 pixels, with enough margin for README display. Produce the actual artwork, not a mockup sheet or brand presentation. No watermark. Do not use a navy-and-gold metallic badge aesthetic.
