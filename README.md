@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/project-avatar.png" alt="mlops-starter-kit project logo" width="160" height="160">
+</p>
+
 # MLOps Starter Kit
 
 [![CI](https://github.com/DiogoRibeiro7/mlops-starter-kit/actions/workflows/ci.yml/badge.svg)](https://github.com/DiogoRibeiro7/mlops-starter-kit/actions/workflows/ci.yml)
